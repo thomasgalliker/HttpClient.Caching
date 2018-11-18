@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     public class StatsResult
     {

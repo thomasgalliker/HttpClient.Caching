@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
     /// Provides the parameter needed to specify expiration timeouts based on HttpStatusCode for the <see cref="InMemoryCacheHandler"/>.

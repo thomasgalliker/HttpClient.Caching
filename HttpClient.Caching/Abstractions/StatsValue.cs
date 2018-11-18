@@ -1,4 +1,4 @@
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
     /// An individual statistics value with some pre-computed calculations.

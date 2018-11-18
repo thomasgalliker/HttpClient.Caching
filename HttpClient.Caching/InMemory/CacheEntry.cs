@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
 
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     internal class CacheEntry : ICacheEntry
     {

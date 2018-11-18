@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
     /// Provides statistical information of the cache hits or misses.

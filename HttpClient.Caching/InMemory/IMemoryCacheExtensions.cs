@@ -3,11 +3,11 @@
 using System;
 using System.Threading.Tasks;
 
-using FishApp.Forms.Services.Http.Caching.Abstractions;
+using Microsoft.Extensions.Caching.Abstractions;
 
 using Microsoft.Extensions.Caching.Memory;
 
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     /// <summary>
     /// Extension methods for an <see cref="IMemoryCache"/>.

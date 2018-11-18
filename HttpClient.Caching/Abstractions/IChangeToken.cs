@@ -2,7 +2,7 @@
 // Type: Microsoft.Extensions.Primitives.IChangeToken
 // Assembly: Microsoft.Extensions.Primitives, Version=1.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 // MVID: E2E2AE84-9284-4D35-8DD3-6210BF615CED
-// Assembly location: C:\src\FishApp\FishApp\packages\Microsoft.Extensions.Primitives.1.1.1\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll
+// Assembly location: Microsoft.Extensions.Primitives.1.1.1\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll
 
 using System;
 

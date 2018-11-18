@@ -8,7 +8,7 @@ using System;
 
 using Microsoft.Extensions.Internal;
 
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     public class MemoryCacheOptions 
     {

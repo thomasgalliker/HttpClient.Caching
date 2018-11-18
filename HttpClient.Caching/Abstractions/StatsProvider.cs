@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
     /// Simple implementation of an <see cref="IStatsProvider"/>.

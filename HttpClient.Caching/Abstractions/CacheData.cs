@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
     /// The data object that is used to put into the cache.

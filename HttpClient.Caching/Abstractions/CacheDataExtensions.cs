@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     public static class CacheDataExtensions
     {
