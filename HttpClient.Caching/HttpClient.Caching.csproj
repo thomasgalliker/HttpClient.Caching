@@ -4,6 +4,16 @@
     <TargetFramework>netstandard1.2</TargetFramework>
     <Authors>Thomas Galliker</Authors>
     <Company>superdev GmbH</Company>
+    <Description>HttpClient.Caching adds http response caching to HttpClient.</Description>
+    <Copyright>Copyright 2018</Copyright>
+    <PackageProjectUrl>https://github.com/thomasgalliker/HttpClient.Caching</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/thomasgalliker/HttpClient.Caching/master/logo.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/thomasgalliker/HttpClient.Caching</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>httpclient.caching;httpclient;caching;cache;inmemory</PackageTags>
+    <PackageReleaseNotes>1.0.0
+- Initial release</PackageReleaseNotes>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
