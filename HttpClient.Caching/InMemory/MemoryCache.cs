@@ -1,0 +1,344 @@
+﻿// Decompiled with JetBrains decompiler
+// Type: Microsoft.Extensions.Caching.Memory.MemoryCache
+// Assembly: Microsoft.Extensions.Caching.Memory, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
+// MVID: 78529ED0-C4AD-4926-BA4D-60032404EE9B
+// Assembly location: C:\Users\thomas\AppData\Local\Temp\Rar$DI01.488\Microsoft.Extensions.Caching.Memory.dll
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Internal;
+
+namespace FishApp.Forms.Services.Http.Caching.InMemory
+{
+    public class MemoryCache : IMemoryCache
+    {
+        private readonly ConcurrentDictionary<object, CacheEntry> entries;
+        private bool disposed;
+        private readonly Action<CacheEntry> setEntry;
+        private readonly Action<CacheEntry> entryExpirationNotification;
+        private readonly ISystemClock clock;
+        private readonly TimeSpan expirationScanFrequency;
+        private DateTimeOffset lastExpirationScan;
+
+        public int Count
+        {
+            get
+            {
+                return this.entries.Count;
+            }
+        }
+
+        private ICollection<KeyValuePair<object, CacheEntry>> EntriesCollection
+        {
+            get
+            {
+                return this.entries;
+            }
+        }
+
+        public MemoryCache() : this(new MemoryCacheOptions())
+        {
+        }
+
+        public MemoryCache(MemoryCacheOptions memoryCacheOptions)
+        {
+            if (memoryCacheOptions == null)
+            {
+                throw new ArgumentNullException(nameof(memoryCacheOptions));
+            }
+            this.entries = new ConcurrentDictionary<object, CacheEntry>();
+            this.setEntry = this.SetEntry;
+            this.entryExpirationNotification = this.EntryExpired;
+            this.clock = memoryCacheOptions.Clock ?? new SystemClock();
+            this.expirationScanFrequency = memoryCacheOptions.ExpirationScanFrequency;
+            this.lastExpirationScan = this.clock.UtcNow;
+        }
+
+        ~MemoryCache()
+        {
+            this.Dispose(false);
+        }
+
+        public ICacheEntry CreateEntry(object key)
+        {
+            this.CheckDisposed();
+            return new CacheEntry(key, this.setEntry, this.entryExpirationNotification);
+        }
+
+        private void SetEntry(CacheEntry entry)
+        {
+            if (this.disposed)
+            {
+                return;
+            }
+            DateTimeOffset utcNow = this.clock.UtcNow;
+            DateTimeOffset? nullable = new DateTimeOffset?();
+            if (entry.absoluteExpirationRelativeToNow.HasValue)
+            {
+                DateTimeOffset dateTimeOffset = utcNow;
+                TimeSpan? expirationRelativeToNow = entry.absoluteExpirationRelativeToNow;
+                nullable = expirationRelativeToNow.HasValue ? dateTimeOffset + expirationRelativeToNow.GetValueOrDefault() : new DateTimeOffset?();
+            }
+            else if (entry.absoluteExpiration.HasValue)
+            {
+                nullable = entry.absoluteExpiration;
+            }
+            if (nullable.HasValue && (!entry.absoluteExpiration.HasValue || nullable.Value < entry.absoluteExpiration.Value))
+            {
+                entry.absoluteExpiration = nullable;
+            }
+            entry.LastAccessed = utcNow;
+            CacheEntry cacheEntry;
+            if (this.entries.TryGetValue(entry.Key, out cacheEntry))
+            {
+                cacheEntry.SetExpired((EvictionReason)2);
+            }
+            if (!entry.CheckExpired(utcNow))
+            {
+                bool flag;
+                if (cacheEntry == null)
+                {
+                    flag = this.entries.TryAdd(entry.Key, entry);
+                }
+                else
+                {
+                    flag = this.entries.TryUpdate(entry.Key, entry, cacheEntry);
+                    if (!flag)
+                    {
+                        flag = this.entries.TryAdd(entry.Key, entry);
+                    }
+                }
+                if (flag)
+                {
+                    entry.AttachTokens();
+                }
+                else
+                {
+                    entry.SetExpired((EvictionReason)2);
+                    entry.InvokeEvictionCallbacks();
+                }
+                if (cacheEntry != null)
+                {
+                    cacheEntry.InvokeEvictionCallbacks();
+                }
+            }
+            else
+            {
+                entry.InvokeEvictionCallbacks();
+                if (cacheEntry != null)
+                {
+                    this.RemoveEntry(cacheEntry);
+                }
+            }
+            this.StartScanForExpiredItems();
+        }
+
+        public bool TryGetValue(object key, out object result)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+            this.CheckDisposed();
+            result = (object)null;
+            DateTimeOffset utcNow = this.clock.UtcNow;
+            bool flag = false;
+            CacheEntry entry;
+            if (this.entries.TryGetValue(key, out entry))
+            {
+                if (entry.CheckExpired(utcNow) && entry.EvictionReason != EvictionReason.Replaced)
+                {
+                    this.RemoveEntry(entry);
+                }
+                else
+                {
+                    flag = true;
+                    entry.LastAccessed = utcNow;
+                    result = entry.Value;
+                    //entry.PropagateOptions(CacheEntryHelper.Current);
+                }
+            }
+            this.StartScanForExpiredItems();
+            return flag;
+        }
+
+        public void Remove(object key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+            this.CheckDisposed();
+            CacheEntry cacheEntry;
+            if (this.entries.TryRemove(key, out cacheEntry))
+            {
+                cacheEntry.SetExpired((EvictionReason)1);
+                cacheEntry.InvokeEvictionCallbacks();
+            }
+            this.StartScanForExpiredItems();
+        }
+
+        public void Clear()
+        {
+            this.CheckDisposed();
+            var keys = this.entries.Keys.ToList();
+            foreach (var key in keys)
+            {
+                CacheEntry cacheEntry;
+                if (this.entries.TryRemove(key, out cacheEntry))
+                {
+                    cacheEntry.SetExpired((EvictionReason)1);
+                    cacheEntry.InvokeEvictionCallbacks();
+                }
+            }
+        
+            this.StartScanForExpiredItems();
+        }
+
+        private void RemoveEntry(CacheEntry entry)
+        {
+            if (!this.EntriesCollection.Remove(new KeyValuePair<object, CacheEntry>(entry.Key, entry)))
+            {
+                return;
+            }
+            entry.InvokeEvictionCallbacks();
+        }
+
+        private void EntryExpired(CacheEntry entry)
+        {
+            this.RemoveEntry(entry);
+            this.StartScanForExpiredItems();
+        }
+
+        private void StartScanForExpiredItems()
+        {
+            DateTimeOffset utcNow = this.clock.UtcNow;
+            if (!(this.expirationScanFrequency < utcNow - this.lastExpirationScan))
+            {
+                return;
+            }
+            this.lastExpirationScan = utcNow;
+            TaskFactory factory = Task.Factory;
+            CancellationToken none = CancellationToken.None;
+            int num = 8;
+            TaskScheduler scheduler = TaskScheduler.Default;
+            factory.StartNew((Action<object>)(state => ScanForExpiredItems((MemoryCache)state)), (object)this, none, (TaskCreationOptions)num, scheduler);
+        }
+
+        private static void ScanForExpiredItems(MemoryCache cache)
+        {
+            DateTimeOffset utcNow = cache.clock.UtcNow;
+            foreach (CacheEntry entry in (IEnumerable<CacheEntry>)cache.entries.Values)
+            {
+                if (entry.CheckExpired(utcNow))
+                {
+                    cache.RemoveEntry(entry);
+                }
+            }
+        }
+
+        public void Compact(double percentage)
+        {
+            List<CacheEntry> entriesToRemove = new List<CacheEntry>();
+            List<CacheEntry> priorityEntries1 = new List<CacheEntry>();
+            List<CacheEntry> priorityEntries2 = new List<CacheEntry>();
+            List<CacheEntry> priorityEntries3 = new List<CacheEntry>();
+            DateTimeOffset utcNow = this.clock.UtcNow;
+
+            foreach (CacheEntry cacheEntry in this.entries.Values)
+            {
+                if (cacheEntry.CheckExpired(utcNow))
+                {
+                    entriesToRemove.Add(cacheEntry);
+                }
+                else
+                {
+                    switch ((int)cacheEntry.Priority)
+                    {
+                        case 0:
+                            priorityEntries1.Add(cacheEntry);
+                            continue;
+                        case 1:
+                            priorityEntries2.Add(cacheEntry);
+                            continue;
+                        case 2:
+                            priorityEntries3.Add(cacheEntry);
+                            continue;
+                        case 3:
+                            continue;
+                        default:
+                            throw new NotSupportedException("Not implemented: " + (object)cacheEntry.Priority);
+                    }
+                }
+            }
+            int removalCountTarget = (int)((double)this.entries.Count * percentage);
+            this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries1);
+            this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries2);
+            this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries3);
+            foreach (CacheEntry entry in entriesToRemove)
+            {
+                this.RemoveEntry(entry);
+            }
+        }
+
+        private void ExpirePriorityBucket(int removalCountTarget, List<CacheEntry> entriesToRemove, List<CacheEntry> priorityEntries)
+        {
+            if (removalCountTarget <= entriesToRemove.Count)
+            {
+                return;
+            }
+            if (entriesToRemove.Count + priorityEntries.Count <= removalCountTarget)
+            {
+                foreach (var priorityEntry in priorityEntries)
+                {
+                    priorityEntry.SetExpired((EvictionReason)5);
+                }
+                entriesToRemove.AddRange((IEnumerable<CacheEntry>)priorityEntries);
+            }
+            else
+            {
+                foreach (var cacheEntry in priorityEntries.OrderBy(entry => entry.LastAccessed))
+                {
+                    cacheEntry.SetExpired((EvictionReason)5);
+                    entriesToRemove.Add(cacheEntry);
+                    if (removalCountTarget <= entriesToRemove.Count)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.disposed)
+            {
+                return;
+            }
+            if (disposing)
+            {
+                GC.SuppressFinalize((object)this);
+            }
+            this.disposed = true;
+        }
+
+        private void CheckDisposed()
+        {
+            if (this.disposed)
+            {
+                throw new ObjectDisposedException(typeof(MemoryCache).FullName);
+            }
+        }
+    }
+}
