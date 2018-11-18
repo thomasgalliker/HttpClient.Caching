@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.2</TargetFramework>
+    <Authors>Thomas Galliker</Authors>
+    <Company>superdev GmbH</Company>
   </PropertyGroup>
 
   <ItemGroup>
