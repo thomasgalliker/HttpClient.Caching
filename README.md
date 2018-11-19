@@ -1,7 +1,7 @@
 # HttpClient.Caching
 [![Version](https://img.shields.io/nuget/v/HttpClient.Caching.svg)](https://www.nuget.org/packages/HttpClient.Caching)  [![Downloads](https://img.shields.io/nuget/dt/HttpClient.Caching.svg)](https://www.nuget.org/packages/HttpClient.Caching)
 
-<img src="https://raw.githubusercontent.com/thomasgalliker/HttpClient.Caching/master/logo.png" alt="HttpClient.Caching" align="right">
+<img src="https://raw.githubusercontent.com/thomasgalliker/HttpClient.Caching/master/logo.png" alt="HttpClient.Caching" align="right" width=140>
 HttpClient.Caching adds http response caching to HttpClient.
 
 ### Download and Install HttpClient.Caching
