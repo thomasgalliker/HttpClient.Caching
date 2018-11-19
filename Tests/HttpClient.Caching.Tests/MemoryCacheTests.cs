@@ -33,6 +33,9 @@ namespace HttpClient.Caching.Tests
             }
 
             // Assert
+            cache.TryGetValue("1", out var result1);
+            result1.Should().NotBeNull();
+            result1.Should().BeOfType<TestPayload>().Which.Id.Should().Be(1);
             cache.Count.Should().Be(10);
         }
     }
