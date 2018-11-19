@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace HttpClient.Caching.Tests
+namespace HttpClient.Caching.Tests.Testdata
 {
     [DebuggerDisplay("{this.Id}")]
     public class TestPayload

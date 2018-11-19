@@ -1,7 +1,8 @@
 ﻿using System;
 using FluentAssertions;
+using HttpClient.Caching.Tests.Testdata;
+using Microsoft.Extensions.Caching.Abstractions;
 using Microsoft.Extensions.Caching.InMemory;
-using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 using Xunit.Abstractions;
 
