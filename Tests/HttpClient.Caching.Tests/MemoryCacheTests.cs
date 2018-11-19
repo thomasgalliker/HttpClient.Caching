@@ -27,18 +27,13 @@ namespace HttpClient.Caching.Tests
             var cacheEntryOptions = new MemoryCacheEntryOptions { SlidingExpiration = expirationTimeSpan };
 
             // Act
-            for (var i = 1; i <= 1000; i++)
+            for (var i = 1; i <= 10; i++)
             {
-                if (i % 100 == 0)
-                {
-                    this.testOutputHelper.WriteLine($"Added {i} items");
-                }
-
                 cache.Set($"{i}", new TestPayload(i), cacheEntryOptions);
             }
 
             // Assert
-            cache.Count.Should().Be(1000);
+            cache.Count.Should().Be(10);
         }
     }
 }

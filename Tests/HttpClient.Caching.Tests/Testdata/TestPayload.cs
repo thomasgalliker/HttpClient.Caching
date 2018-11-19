@@ -6,7 +6,7 @@ namespace HttpClient.Caching.Tests.Testdata
     [DebuggerDisplay("{this.Id}")]
     public class TestPayload
     {
-        private const int BufferSize = 10 * 1024 * 1024; // 10MB buffer size
+        private const int BufferSize = 10 * 1024; // 1MB buffer size
 
         private static readonly Random Random = new Random();
         private readonly byte[] buffer = new byte[BufferSize];
