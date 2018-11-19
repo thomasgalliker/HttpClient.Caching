@@ -1,15 +1,10 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Microsoft.Extensions.Caching.Memory.IMemoryCache
-// Assembly: Microsoft.Extensions.Caching.Abstractions, Version=1.1.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
-// MVID: E327E23F-23AA-413B-8382-1A0C0F261081
-// Assembly location: Microsoft.Extensions.Caching.Abstractions.1.1.2\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll
+﻿using System;
+using Microsoft.Extensions.Caching.Abstractions;
 
-using System;
-
-namespace Microsoft.Extensions.Caching.Memory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     /// <summary>
-    /// Represents a local in-memory cache whose values are not serialized.
+    ///     Represents a local in-memory cache whose values are not serialized.
     /// </summary>
     public interface IMemoryCache : IDisposable
     {
@@ -21,7 +16,7 @@ namespace Microsoft.Extensions.Caching.Memory
 
         /// <summary>Create or overwrite an entry in the cache.</summary>
         /// <param name="key">An object identifying the entry.</param>
-        /// <returns>The newly created <see cref="T:Microsoft.Extensions.Caching.Memory.ICacheEntry" /> instance.</returns>
+        /// <returns>The newly created <see cref="T:Microsoft.Extensions.Caching.Abstractions.ICacheEntry" /> instance.</returns>
         ICacheEntry CreateEntry(object key);
 
         /// <summary>Removes the object associated with the given key.</summary>

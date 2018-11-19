@@ -1,15 +1,8 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Microsoft.Extensions.Caching.Memory.CacheExtensions
-// Assembly: Microsoft.Extensions.Caching.Abstractions, Version=1.1.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
-// MVID: E327E23F-23AA-413B-8382-1A0C0F261081
-// Assembly location: Microsoft.Extensions.Caching.Abstractions.1.1.2\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.InMemory;
 
-using Microsoft.Extensions.Primitives;
-
-namespace Microsoft.Extensions.Caching.Memory
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     public static class CacheExtensions
     {
@@ -35,6 +28,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 value = (TItem)obj;
                 return true;
             }
+
             value = default(TItem);
             return false;
         }
@@ -82,9 +76,13 @@ namespace Microsoft.Extensions.Caching.Memory
             using (ICacheEntry entry = cache.CreateEntry(key))
             {
                 if (options != null)
+                {
                     entry.SetOptions(options);
+                }
+
                 entry.Value = value;
             }
+
             return value;
         }
 
@@ -98,6 +96,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 entry.SetValue(obj);
                 entry.Dispose();
             }
+
             return (TItem)obj;
         }
 
@@ -112,6 +111,7 @@ namespace Microsoft.Extensions.Caching.Memory
                 entry.Dispose();
                 entry = null;
             }
+
             return (TItem)obj;
         }
     }

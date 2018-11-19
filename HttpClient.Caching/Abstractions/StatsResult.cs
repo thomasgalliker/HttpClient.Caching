@@ -17,23 +17,24 @@ namespace Microsoft.Extensions.Caching.Abstractions
         }
 
         /// <summary>
-        /// The cache type, in order to distinguish between various caching strategies such as InMemory caching or Redis based caching.
+        ///     The cache type, in order to distinguish between various caching strategies such as InMemory caching or Redis based
+        ///     caching.
         /// </summary>
         public string CacheType { get; }
 
         /// <summary>
-        /// The time when these stats have been created.
+        ///     The time when these stats have been created.
         /// </summary>
         public DateTimeOffset StatsCreatedAt { get; }
 
         /// <summary>
-        /// The statistics per status code.
+        ///     The statistics per status code.
         /// </summary>
         public Dictionary<HttpStatusCode, StatsValue> PerStatusCode { get; set; }
 
         /// <summary>
-        /// The summary of <see cref="PerStatusCode"/> statistics, providing a simple overview.
+        ///     The summary of <see cref="PerStatusCode" /> statistics, providing a simple overview.
         /// </summary>
-        public StatsValue Total => new StatsValue {CacheHit = this.PerStatusCode.Sum(v => v.Value.CacheHit), CacheMiss = this.PerStatusCode.Sum(v => v.Value.CacheMiss)};
+        public StatsValue Total => new StatsValue { CacheHit = this.PerStatusCode.Sum(v => v.Value.CacheHit), CacheMiss = this.PerStatusCode.Sum(v => v.Value.CacheMiss) };
     }
 }

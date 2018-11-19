@@ -1,15 +1,8 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Microsoft.Extensions.Caching.Memory.CacheEntryExtensions
-// Assembly: Microsoft.Extensions.Caching.Abstractions, Version=1.1.2.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
-// MVID: E327E23F-23AA-413B-8382-1A0C0F261081
-// Assembly location: Microsoft.Extensions.Caching.Abstractions.1.1.2\lib\netstandard1.0\Microsoft.Extensions.Caching.Abstractions.dll
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Caching.Abstractions;
 
-using Microsoft.Extensions.Primitives;
-
-namespace Microsoft.Extensions.Caching.Memory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     public static class CacheEntryExtensions
     {
@@ -25,11 +18,12 @@ namespace Microsoft.Extensions.Caching.Memory
         }
 
         /// <summary>
-        ///     Expire the cache entry if the given <see cref="T:Microsoft.Extensions.Primitives.IChangeToken" /> expires.
+        ///     Expire the cache entry if the given <see cref="T:Microsoft.Extensions.Caching.Abstractions.IChangeToken" />
+        ///     expires.
         /// </summary>
-        /// <param name="entry">The <see cref="T:Microsoft.Extensions.Caching.Memory.ICacheEntry" />.</param>
+        /// <param name="entry">The <see cref="T:Microsoft.Extensions.Caching.Abstractions.ICacheEntry" />.</param>
         /// <param name="expirationToken">
-        ///     The <see cref="T:Microsoft.Extensions.Primitives.IChangeToken" /> that causes the cache
+        ///     The <see cref="T:Microsoft.Extensions.Caching.Abstractions.IChangeToken" /> that causes the cache
         ///     entry to expire.
         /// </param>
         public static ICacheEntry AddExpirationToken(this ICacheEntry entry, IChangeToken expirationToken)
@@ -38,6 +32,7 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 throw new ArgumentNullException("expirationToken");
             }
+
             entry.ExpirationTokens.Add(expirationToken);
             return entry;
         }
@@ -83,6 +78,7 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 throw new ArgumentNullException("callback");
             }
+
             return entry.RegisterPostEvictionCallback(callback, (object)null);
         }
 
@@ -98,6 +94,7 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 throw new ArgumentNullException("callback");
             }
+
             entry.PostEvictionCallbacks.Add(new PostEvictionCallbackRegistration() { EvictionCallback = callback, State = state });
             return entry;
         }
@@ -112,7 +109,7 @@ namespace Microsoft.Extensions.Caching.Memory
         }
 
         /// <summary>
-        ///     Applies the values of an existing <see cref="T:Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions" /> to
+        ///     Applies the values of an existing <see cref="T:Microsoft.Extensions.Caching.InMemory.MemoryCacheEntryOptions" /> to
         ///     the entry.
         /// </summary>
         /// <param name="entry"></param>
@@ -123,6 +120,7 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 throw new ArgumentNullException(nameof(options));
             }
+
             entry.AbsoluteExpiration = options.AbsoluteExpiration;
             entry.AbsoluteExpirationRelativeToNow = options.AbsoluteExpirationRelativeToNow;
             entry.SlidingExpiration = options.SlidingExpiration;
@@ -131,10 +129,12 @@ namespace Microsoft.Extensions.Caching.Memory
             {
                 entry.AddExpirationToken(expirationToken);
             }
+
             foreach (PostEvictionCallbackRegistration evictionCallback in (IEnumerable<PostEvictionCallbackRegistration>)options.PostEvictionCallbacks)
             {
                 entry.RegisterPostEvictionCallback(evictionCallback.EvictionCallback, evictionCallback.State);
             }
+
             return entry;
         }
     }

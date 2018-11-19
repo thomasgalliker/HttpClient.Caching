@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Caching.Abstractions;
+using Microsoft.Extensions.Caching.InMemory.Internal;
 
 namespace Microsoft.Extensions.Caching.InMemory
 {
@@ -22,18 +21,12 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         public int Count
         {
-            get
-            {
-                return this.entries.Count;
-            }
+            get { return this.entries.Count; }
         }
 
         private ICollection<KeyValuePair<object, CacheEntry>> EntriesCollection
         {
-            get
-            {
-                return this.entries;
-            }
+            get { return this.entries; }
         }
 
         public MemoryCache() : this(new MemoryCacheOptions())
@@ -46,6 +39,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 throw new ArgumentNullException(nameof(memoryCacheOptions));
             }
+
             this.entries = new ConcurrentDictionary<object, CacheEntry>();
             this.setEntry = this.SetEntry;
             this.entryExpirationNotification = this.EntryExpired;
@@ -71,6 +65,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 return;
             }
+
             DateTimeOffset utcNow = this.clock.UtcNow;
             DateTimeOffset? nullable = new DateTimeOffset?();
             if (entry.absoluteExpirationRelativeToNow.HasValue)
@@ -83,16 +78,19 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 nullable = entry.absoluteExpiration;
             }
+
             if (nullable.HasValue && (!entry.absoluteExpiration.HasValue || nullable.Value < entry.absoluteExpiration.Value))
             {
                 entry.absoluteExpiration = nullable;
             }
+
             entry.LastAccessed = utcNow;
             CacheEntry cacheEntry;
             if (this.entries.TryGetValue(entry.Key, out cacheEntry))
             {
                 cacheEntry.SetExpired((EvictionReason)2);
             }
+
             if (!entry.CheckExpired(utcNow))
             {
                 bool flag;
@@ -108,6 +106,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                         flag = this.entries.TryAdd(entry.Key, entry);
                     }
                 }
+
                 if (flag)
                 {
                     entry.AttachTokens();
@@ -117,6 +116,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                     entry.SetExpired((EvictionReason)2);
                     entry.InvokeEvictionCallbacks();
                 }
+
                 if (cacheEntry != null)
                 {
                     cacheEntry.InvokeEvictionCallbacks();
@@ -130,6 +130,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                     this.RemoveEntry(cacheEntry);
                 }
             }
+
             this.StartScanForExpiredItems();
         }
 
@@ -139,6 +140,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
             this.CheckDisposed();
             result = (object)null;
             DateTimeOffset utcNow = this.clock.UtcNow;
@@ -158,6 +160,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                     //entry.PropagateOptions(CacheEntryHelper.Current);
                 }
             }
+
             this.StartScanForExpiredItems();
             return flag;
         }
@@ -168,6 +171,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
             this.CheckDisposed();
             CacheEntry cacheEntry;
             if (this.entries.TryRemove(key, out cacheEntry))
@@ -175,6 +179,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 cacheEntry.SetExpired((EvictionReason)1);
                 cacheEntry.InvokeEvictionCallbacks();
             }
+
             this.StartScanForExpiredItems();
         }
 
@@ -191,7 +196,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                     cacheEntry.InvokeEvictionCallbacks();
                 }
             }
-        
+
             this.StartScanForExpiredItems();
         }
 
@@ -201,6 +206,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 return;
             }
+
             entry.InvokeEvictionCallbacks();
         }
 
@@ -217,6 +223,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 return;
             }
+
             this.lastExpirationScan = utcNow;
             TaskFactory factory = Task.Factory;
             CancellationToken none = CancellationToken.None;
@@ -271,6 +278,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                     }
                 }
             }
+
             int removalCountTarget = (int)((double)this.entries.Count * percentage);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries1);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries2);
@@ -287,12 +295,14 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 return;
             }
+
             if (entriesToRemove.Count + priorityEntries.Count <= removalCountTarget)
             {
                 foreach (var priorityEntry in priorityEntries)
                 {
                     priorityEntry.SetExpired((EvictionReason)5);
                 }
+
                 entriesToRemove.AddRange((IEnumerable<CacheEntry>)priorityEntries);
             }
             else
@@ -320,10 +330,12 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 return;
             }
+
             if (disposing)
             {
                 GC.SuppressFinalize((object)this);
             }
+
             this.disposed = true;
         }
 

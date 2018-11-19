@@ -4,7 +4,7 @@ using System.Net.Http;
 namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
-    /// The data object that is used to put into the cache.
+    ///     The data object that is used to put into the cache.
     /// </summary>
     public class CacheData
     {
@@ -17,22 +17,22 @@ namespace Microsoft.Extensions.Caching.Abstractions
         }
 
         /// <summary>
-        /// The cachable part of a previously retrieved response (excludes the content and request).
+        ///     The cachable part of a previously retrieved response (excludes the content and request).
         /// </summary>
         public HttpResponseMessage CachableResponse { get; }
 
         /// <summary>
-        /// The content of the response.
+        ///     The content of the response.
         /// </summary>
         public byte[] Data { get; }
 
         /// <summary>
-        /// the headers of the response.
+        ///     the headers of the response.
         /// </summary>
         public Dictionary<string, IEnumerable<string>> Headers { get; }
 
         /// <summary>
-        /// The content headers of the response.
+        ///     The content headers of the response.
         /// </summary>
         public Dictionary<string, IEnumerable<string>> ContentHeaders { get; }
     }
