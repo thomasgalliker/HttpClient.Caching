@@ -2,17 +2,17 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
-    /// Extension methods of the HttpResponseMessage that are related to the caching functionality.
+    ///     Extension methods of the HttpResponseMessage that are related to the caching functionality.
     /// </summary>
     public static class HttpResponseMessageExtensions
     {
         public static async Task<CacheData> ToCacheEntry(this HttpResponseMessage response)
         {
             var data = await response.Content.ReadAsByteArrayAsync();
-            var copy = new HttpResponseMessage{ ReasonPhrase = response.ReasonPhrase, StatusCode = response.StatusCode, Version = response.Version };
+            var copy = new HttpResponseMessage { ReasonPhrase = response.ReasonPhrase, StatusCode = response.StatusCode, Version = response.Version };
             var headers = response.Headers.Where(h => h.Value != null && h.Value.Any()).ToDictionary(h => h.Key, h => h.Value);
             var contentHeaders = response.Content.Headers.Where(h => h.Value != null && h.Value.Any()).ToDictionary(h => h.Key, h => h.Value);
             var entry = new CacheData(data, copy, headers, contentHeaders);
@@ -20,7 +20,7 @@ namespace FishApp.Forms.Services.Http.Caching.Abstractions
         }
 
         /// <summary>
-        /// Prepares the cached entry to be consumed by the caller, notably by setting the content.
+        ///     Prepares the cached entry to be consumed by the caller, notably by setting the content.
         /// </summary>
         /// <param name="request">The request that invoked retrieving this response and need to be attached to the response.</param>
         /// <param name="cachedData">The deserialized data from the cache.</param>
@@ -44,6 +44,7 @@ namespace FishApp.Forms.Services.Http.Caching.Abstractions
                     response.Content.Headers.TryAddWithoutValidation(kvp.Key, kvp.Value);
                 }
             }
+
             response.RequestMessage = request;
             return response;
         }

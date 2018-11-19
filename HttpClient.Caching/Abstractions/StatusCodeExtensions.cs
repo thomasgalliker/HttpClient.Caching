@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
-    /// Extension methods to HttpStatusCode that are related to caching functionality of this library.
+    ///     Extension methods to HttpStatusCode that are related to caching functionality of this library.
     /// </summary>
     public static class StatusCodeExtensions
     {
         /// <summary>
-        /// Gets an expiration time for the cache entry.
+        ///     Gets an expiration time for the cache entry.
         /// </summary>
         /// <param name="statusCode">The status code to inspect the mapping.</param>
         /// <param name="mapping">The mapping providing configuration of what data to use.</param>

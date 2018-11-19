@@ -9,11 +9,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Abstractions;
 
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Primitives;
-
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     internal class CacheEntry : ICacheEntry
     {
@@ -34,22 +32,13 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
 
         public DateTimeOffset? AbsoluteExpiration
         {
-            get
-            {
-                return this.absoluteExpiration;
-            }
-            set
-            {
-                this.absoluteExpiration = value;
-            }
+            get { return this.absoluteExpiration; }
+            set { this.absoluteExpiration = value; }
         }
 
         public TimeSpan? AbsoluteExpirationRelativeToNow
         {
-            get
-            {
-                return this.absoluteExpirationRelativeToNow;
-            }
+            get { return this.absoluteExpirationRelativeToNow; }
             set
             {
                 TimeSpan? nullable = value;
@@ -58,16 +47,14 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 {
                     throw new ArgumentOutOfRangeException("AbsoluteExpirationRelativeToNow", (object)value, "The relative expiration value must be positive.");
                 }
+
                 this.absoluteExpirationRelativeToNow = value;
             }
         }
 
         public TimeSpan? SlidingExpiration
         {
-            get
-            {
-                return this.slidingExpiration;
-            }
+            get { return this.slidingExpiration; }
             set
             {
                 TimeSpan? nullable = value;
@@ -76,6 +63,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 {
                     throw new ArgumentOutOfRangeException("SlidingExpiration", (object)value, "The sliding expiration value must be positive.");
                 }
+
                 this.slidingExpiration = value;
             }
         }
@@ -88,6 +76,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 {
                     this.expirationTokens = (IList<IChangeToken>)new List<IChangeToken>();
                 }
+
                 return this.expirationTokens;
             }
         }
@@ -100,6 +89,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 {
                     this._postEvictionCallbacks = (IList<PostEvictionCallbackRegistration>)new List<PostEvictionCallbackRegistration>();
                 }
+
                 return this._postEvictionCallbacks;
             }
         }
@@ -118,14 +108,17 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 throw new ArgumentNullException("key");
             }
+
             if (notifyCacheEntryDisposed == null)
             {
                 throw new ArgumentNullException("notifyCacheEntryDisposed");
             }
+
             if (notifyCacheOfExpiration == null)
             {
                 throw new ArgumentNullException("notifyCacheOfExpiration");
             }
+
             this.Key = key;
             this._notifyCacheEntryDisposed = notifyCacheEntryDisposed;
             this._notifyCacheOfExpiration = notifyCacheOfExpiration;
@@ -137,6 +130,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             this.added = true;
             this._notifyCacheEntryDisposed(this);
             //this.PropagateOptions(_added);
@@ -148,6 +142,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return this.CheckForExpiredTokens();
             }
+
             return true;
         }
 
@@ -157,6 +152,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 this.EvictionReason = reason;
             }
+
             this.isExpired = true;
             this.DetachTokens();
         }
@@ -168,6 +164,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 this.SetExpired((EvictionReason)3);
                 return true;
             }
+
             if (this.slidingExpiration.HasValue)
             {
                 TimeSpan timeSpan = now - this.LastAccessed;
@@ -178,6 +175,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -194,6 +192,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     }
                 }
             }
+
             return false;
         }
 
@@ -203,6 +202,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             lock (this.Lock)
             {
                 for (int i = 0; i < this.expirationTokens.Count; ++i)
@@ -214,6 +214,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                         {
                             this.expirationTokenRegistrations = new List<IDisposable>(1);
                         }
+
                         this.expirationTokenRegistrations.Add(expirationToken.RegisterChangeCallback(ExpirationCallback, this));
                     }
                 }
@@ -223,11 +224,11 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
         private static void ExpirationTokensExpired(object obj)
         {
             Task.Factory.StartNew((Action<object>)(state =>
-                                                          {
-                                                              CacheEntry cacheEntry = (CacheEntry)state;
-                                                              cacheEntry.SetExpired((EvictionReason)4);
-                                                              cacheEntry._notifyCacheOfExpiration(cacheEntry);
-                                                          }), obj, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            {
+                CacheEntry cacheEntry = (CacheEntry)state;
+                cacheEntry.SetExpired((EvictionReason)4);
+                cacheEntry._notifyCacheOfExpiration(cacheEntry);
+            }), obj, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
         private void DetachTokens()
@@ -239,6 +240,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 {
                     return;
                 }
+
                 this.expirationTokenRegistrations = null;
                 for (int i = 0; i < tokenRegistrations.Count; ++i)
                 {
@@ -253,6 +255,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             TaskFactory factory = Task.Factory;
             CancellationToken none = CancellationToken.None;
             int num = 8;
@@ -267,6 +270,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             for (int index = 0; index < ((ICollection<PostEvictionCallbackRegistration>)callbackRegistrationList).Count; ++index)
             {
                 PostEvictionCallbackRegistration callbackRegistration = callbackRegistrationList[index];
@@ -294,6 +298,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             if (this.expirationTokens != null)
             {
                 lock (this.Lock)
@@ -311,10 +316,12 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     }
                 }
             }
+
             if (!this.absoluteExpiration.HasValue)
             {
                 return;
             }
+
             if (parent.absoluteExpiration.HasValue)
             {
                 DateTimeOffset? absoluteExpiration1 = this.absoluteExpiration;
@@ -324,6 +331,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     return;
                 }
             }
+
             parent.absoluteExpiration = this.absoluteExpiration;
         }
     }

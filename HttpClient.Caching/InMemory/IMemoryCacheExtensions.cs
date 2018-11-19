@@ -1,21 +1,16 @@
-﻿
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Abstractions;
 
-using FishApp.Forms.Services.Http.Caching.Abstractions;
-
-using Microsoft.Extensions.Caching.Memory;
-
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     /// <summary>
-    /// Extension methods for an <see cref="IMemoryCache"/>.
+    ///     Extension methods for an <see cref="IMemoryCache" />.
     /// </summary>
     internal static class IMemoryCacheExtensions
     {
         /// <summary>
-        /// Tries to get the data from cache, that is, ignoring all exceptions.
+        ///     Tries to get the data from cache, that is, ignoring all exceptions.
         /// </summary>
         /// <param name="cache">The in memory cache.</param>
         /// <param name="key">The key to retrieve from the cache.</param>
@@ -29,6 +24,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 {
                     return Task.FromResult(binaryData.Deserialize());
                 }
+
                 return Task.FromResult(default(CacheData));
             }
             catch (Exception)
@@ -39,7 +35,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
         }
 
         /// <summary>
-        /// Tries to set a new value to the cache, that is, ignoring all exceptions.
+        ///     Tries to set a new value to the cache, that is, ignoring all exceptions.
         /// </summary>
         /// <param name="cache">The in memory cache.</param>
         /// <param name="key">The key for this cache entry.</param>

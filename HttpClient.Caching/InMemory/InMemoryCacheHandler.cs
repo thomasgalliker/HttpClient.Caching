@@ -4,12 +4,9 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Abstractions;
 
-using FishApp.Forms.Services.Http.Caching.Abstractions;
-
-using Microsoft.Extensions.Caching.Memory;
-
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     /// <summary>
     ///     Tries to retrieve the result from an InMemory cache, and if that's not available, gets the value from the

@@ -2,15 +2,13 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Abstractions;
 
-using FishApp.Forms.Services.Http.Caching.Abstractions;
-
-using Microsoft.Extensions.Caching.Memory;
-
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     /// <summary>
-    /// Tries to retrieve the result from the HTTP call, and if it times out or results in an unsuccessful status code, tries to get it from cache.
+    ///     Tries to retrieve the result from the HTTP call, and if it times out or results in an unsuccessful status code,
+    ///     tries to get it from cache.
     /// </summary>
     public class InMemoryCacheFallbackHandler : DelegatingHandler
     {
@@ -21,22 +19,30 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
         internal const string CacheFallbackKeyPrefix = "cfb";
 
         /// <summary>
-        /// Create a new InMemoryCacheHandler.
+        ///     Create a new InMemoryCacheHandler.
         /// </summary>
         /// <param name="innerHandler">The inner handler to retrieve the content from on cache misses.</param>
         /// <param name="maxTimeout">The maximum timeout to wait for the service to respond.</param>
         /// <param name="cacheDuration">The maximum time span the item should be remained in the cache if not renewed before then.</param>
-        /// <param name="statsProvider">An <see cref="IStatsProvider"/> that records statistic information about the caching behavior.</param>
+        /// <param name="statsProvider">
+        ///     An <see cref="IStatsProvider" /> that records statistic information about the caching
+        ///     behavior.
+        /// </param>
         public InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider = null)
-            : this(innerHandler, maxTimeout, cacheDuration, statsProvider, new MemoryCache(new MemoryCacheOptions())) {}
+            : this(innerHandler, maxTimeout, cacheDuration, statsProvider, new MemoryCache(new MemoryCacheOptions()))
+        {
+        }
 
         /// <summary>
-        /// Used for injecting an IMemoryCache for unit testing purposes.
+        ///     Used for injecting an IMemoryCache for unit testing purposes.
         /// </summary>
         /// <param name="innerHandler">The inner handler to retrieve the content from on cache misses.</param>
         /// <param name="maxTimeout">The maximum timeout to wait for the service to respond.</param>
         /// <param name="cacheDuration">The maximum time span the item should be remained in the cache if not renewed before then.</param>
-        /// <param name="statsProvider">An <see cref="IStatsProvider"/> that records statistic information about the caching behavior.</param>
+        /// <param name="statsProvider">
+        ///     An <see cref="IStatsProvider" /> that records statistic information about the caching
+        ///     behavior.
+        /// </param>
         /// <param name="cache">The cache to be used.</param>
         internal InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider, IMemoryCache cache) : base(innerHandler ?? new HttpClientHandler())
         {
@@ -47,7 +53,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
         }
 
         /// <summary>
-        /// Tries to get the value from the cache, and only calls the delegating handler on cache misses.
+        ///     Tries to get the value from the cache, and only calls the delegating handler on cache misses.
         /// </summary>
         /// <returns>The HttpResponseMessage from cache, or a newly invoked one.</returns>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -64,7 +70,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             var httpSendTask = base.SendAsync(request, cancellationToken);
             var timeoutTask = Task.Delay(this.maxTimeout, cancellationToken);
             var cacheTask = this.responseCache.TryGetAsync(key);
-            
+
             // ensure the send task completes (or the timeout task, whatever comes first).
             var firstCompletedTask = await Task.WhenAny(httpSendTask, timeoutTask);
 
@@ -83,7 +89,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
 
             // we got it from the HTTP data directly, or it wasn't in the cache and got it after the max timeout value; save that result to the cache and return it
             var response = await httpSendTask;
-            
+
             // try to save it to the cache
             var entry = await this.SaveToCache(response, key);
 
@@ -107,14 +113,13 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
         }
 
         private async Task<HttpResponseMessage> ExtractCachedResponse(HttpRequestMessage request, Task<CacheData> cacheTask)
-        { 
+        {
             // get from cache
             var data = await cacheTask;
 
             // it's in the cache, return that result
             if (data != null)
             {
-                
                 // get the data from the cache
                 var cachedResponse = request.PrepareCachedEntry(data);
                 this.StatsProvider.ReportCacheHit(cachedResponse.StatusCode);
@@ -126,7 +131,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
 
         private async Task<CacheData> SaveToCache(HttpResponseMessage response, string key)
         {
-            if ((int) response.StatusCode < 500 && TimeSpan.Zero != this.cacheDuration)
+            if ((int)response.StatusCode < 500 && TimeSpan.Zero != this.cacheDuration)
             {
                 var entry = await response.ToCacheEntry();
                 await this.responseCache.TrySetAsync(key, entry, this.cacheDuration);

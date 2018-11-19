@@ -1,20 +1,13 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Microsoft.Extensions.Caching.Memory.MemoryCache
-// Assembly: Microsoft.Extensions.Caching.Memory, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
-// MVID: 78529ED0-C4AD-4926-BA4D-60032404EE9B
-// Assembly location: C:\Users\thomas\AppData\Local\Temp\Rar$DI01.488\Microsoft.Extensions.Caching.Memory.dll
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Abstractions;
+using Microsoft.Extensions.Caching.InMemory.Internal;
 
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Internal;
-
-namespace FishApp.Forms.Services.Http.Caching.InMemory
+namespace Microsoft.Extensions.Caching.InMemory
 {
     public class MemoryCache : IMemoryCache
     {
@@ -28,18 +21,12 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
 
         public int Count
         {
-            get
-            {
-                return this.entries.Count;
-            }
+            get { return this.entries.Count; }
         }
 
         private ICollection<KeyValuePair<object, CacheEntry>> EntriesCollection
         {
-            get
-            {
-                return this.entries;
-            }
+            get { return this.entries; }
         }
 
         public MemoryCache() : this(new MemoryCacheOptions())
@@ -52,6 +39,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 throw new ArgumentNullException(nameof(memoryCacheOptions));
             }
+
             this.entries = new ConcurrentDictionary<object, CacheEntry>();
             this.setEntry = this.SetEntry;
             this.entryExpirationNotification = this.EntryExpired;
@@ -77,6 +65,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             DateTimeOffset utcNow = this.clock.UtcNow;
             DateTimeOffset? nullable = new DateTimeOffset?();
             if (entry.absoluteExpirationRelativeToNow.HasValue)
@@ -89,16 +78,19 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 nullable = entry.absoluteExpiration;
             }
+
             if (nullable.HasValue && (!entry.absoluteExpiration.HasValue || nullable.Value < entry.absoluteExpiration.Value))
             {
                 entry.absoluteExpiration = nullable;
             }
+
             entry.LastAccessed = utcNow;
             CacheEntry cacheEntry;
             if (this.entries.TryGetValue(entry.Key, out cacheEntry))
             {
                 cacheEntry.SetExpired((EvictionReason)2);
             }
+
             if (!entry.CheckExpired(utcNow))
             {
                 bool flag;
@@ -114,6 +106,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                         flag = this.entries.TryAdd(entry.Key, entry);
                     }
                 }
+
                 if (flag)
                 {
                     entry.AttachTokens();
@@ -123,6 +116,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     entry.SetExpired((EvictionReason)2);
                     entry.InvokeEvictionCallbacks();
                 }
+
                 if (cacheEntry != null)
                 {
                     cacheEntry.InvokeEvictionCallbacks();
@@ -136,6 +130,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     this.RemoveEntry(cacheEntry);
                 }
             }
+
             this.StartScanForExpiredItems();
         }
 
@@ -145,6 +140,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
             this.CheckDisposed();
             result = (object)null;
             DateTimeOffset utcNow = this.clock.UtcNow;
@@ -164,6 +160,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     //entry.PropagateOptions(CacheEntryHelper.Current);
                 }
             }
+
             this.StartScanForExpiredItems();
             return flag;
         }
@@ -174,6 +171,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
             this.CheckDisposed();
             CacheEntry cacheEntry;
             if (this.entries.TryRemove(key, out cacheEntry))
@@ -181,6 +179,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                 cacheEntry.SetExpired((EvictionReason)1);
                 cacheEntry.InvokeEvictionCallbacks();
             }
+
             this.StartScanForExpiredItems();
         }
 
@@ -197,7 +196,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     cacheEntry.InvokeEvictionCallbacks();
                 }
             }
-        
+
             this.StartScanForExpiredItems();
         }
 
@@ -207,6 +206,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             entry.InvokeEvictionCallbacks();
         }
 
@@ -223,6 +223,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             this.lastExpirationScan = utcNow;
             TaskFactory factory = Task.Factory;
             CancellationToken none = CancellationToken.None;
@@ -277,6 +278,7 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
                     }
                 }
             }
+
             int removalCountTarget = (int)((double)this.entries.Count * percentage);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries1);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries2);
@@ -293,12 +295,14 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             if (entriesToRemove.Count + priorityEntries.Count <= removalCountTarget)
             {
                 foreach (var priorityEntry in priorityEntries)
                 {
                     priorityEntry.SetExpired((EvictionReason)5);
                 }
+
                 entriesToRemove.AddRange((IEnumerable<CacheEntry>)priorityEntries);
             }
             else
@@ -326,10 +330,12 @@ namespace FishApp.Forms.Services.Http.Caching.InMemory
             {
                 return;
             }
+
             if (disposing)
             {
                 GC.SuppressFinalize((object)this);
             }
+
             this.disposed = true;
         }
 

@@ -2,10 +2,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 
-namespace FishApp.Forms.Services.Http.Caching.Abstractions
+namespace Microsoft.Extensions.Caching.Abstractions
 {
     /// <summary>
-    /// Simple implementation of an <see cref="IStatsProvider"/>.
+    ///     Simple implementation of an <see cref="IStatsProvider" />.
     /// </summary>
     public class StatsProvider : IStatsProvider
     {
@@ -20,7 +20,7 @@ namespace FishApp.Forms.Services.Http.Caching.Abstractions
 
         public void ReportCacheHit(HttpStatusCode statusCode)
         {
-            this.values.AddOrUpdate(statusCode, _ => new StatsValue {CacheHit = 1}, (_, existing) =>
+            this.values.AddOrUpdate(statusCode, _ => new StatsValue { CacheHit = 1 }, (_, existing) =>
             {
                 existing.CacheHit++;
                 return existing;
@@ -38,7 +38,7 @@ namespace FishApp.Forms.Services.Http.Caching.Abstractions
 
         public StatsResult GetStatistics()
         {
-            return new StatsResult(this.cacheType) {PerStatusCode = new Dictionary<HttpStatusCode, StatsValue>(this.values)};
+            return new StatsResult(this.cacheType) { PerStatusCode = new Dictionary<HttpStatusCode, StatsValue>(this.values) };
         }
     }
 }
