@@ -161,7 +161,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             if (this.absoluteExpiration.HasValue && this.absoluteExpiration.Value <= now)
             {
-                this.SetExpired((EvictionReason)3);
+                this.SetExpired(EvictionReason.Expired);
                 return true;
             }
 
@@ -171,7 +171,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan? slidingExpiration = this.slidingExpiration;
                 if ((slidingExpiration.HasValue ? (timeSpan >= slidingExpiration.GetValueOrDefault() ? 1 : 0) : 0) != 0)
                 {
-                    this.SetExpired((EvictionReason)3);
+                    this.SetExpired(EvictionReason.Expired);
                     return true;
                 }
             }
@@ -187,7 +187,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 {
                     if (this.expirationTokens[index].HasChanged)
                     {
-                        this.SetExpired((EvictionReason)4);
+                        this.SetExpired(EvictionReason.TokenExpired);
                         return true;
                     }
                 }
@@ -223,12 +223,12 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         private static void ExpirationTokensExpired(object obj)
         {
-            Task.Factory.StartNew((Action<object>)(state =>
+            Task.Factory.StartNew(state =>
             {
-                CacheEntry cacheEntry = (CacheEntry)state;
-                cacheEntry.SetExpired((EvictionReason)4);
+                var cacheEntry = (CacheEntry)state;
+                cacheEntry.SetExpired(EvictionReason.TokenExpired);
                 cacheEntry._notifyCacheOfExpiration(cacheEntry);
-            }), obj, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            }, obj, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
         private void DetachTokens()
@@ -242,9 +242,9 @@ namespace Microsoft.Extensions.Caching.InMemory
                 }
 
                 this.expirationTokenRegistrations = null;
-                for (int i = 0; i < tokenRegistrations.Count; ++i)
+                foreach (var disposable in tokenRegistrations)
                 {
-                    tokenRegistrations[i].Dispose();
+                    disposable.Dispose();
                 }
             }
         }
@@ -258,22 +258,20 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             TaskFactory factory = Task.Factory;
             CancellationToken none = CancellationToken.None;
-            int num = 8;
             TaskScheduler scheduler = TaskScheduler.Default;
-            factory.StartNew((Action<object>)(state => InvokeCallbacks((CacheEntry)state)), (object)this, none, (TaskCreationOptions)num, scheduler);
+            factory.StartNew((Action<object>)(state => InvokeCallbacks((CacheEntry)state)), (object)this, none, TaskCreationOptions.DenyChildAttach, scheduler);
         }
 
         private static void InvokeCallbacks(CacheEntry entry)
         {
-            IList<PostEvictionCallbackRegistration> callbackRegistrationList = Interlocked.Exchange<IList<PostEvictionCallbackRegistration>>(ref entry._postEvictionCallbacks, (IList<PostEvictionCallbackRegistration>)null);
+            var callbackRegistrationList = Interlocked.Exchange(ref entry._postEvictionCallbacks, null);
             if (callbackRegistrationList == null)
             {
                 return;
             }
 
-            for (int index = 0; index < ((ICollection<PostEvictionCallbackRegistration>)callbackRegistrationList).Count; ++index)
+            foreach (var callbackRegistration in callbackRegistrationList)
             {
-                PostEvictionCallbackRegistration callbackRegistration = callbackRegistrationList[index];
                 try
                 {
                     PostEvictionDelegate evictionCallback = callbackRegistration.EvictionCallback;
