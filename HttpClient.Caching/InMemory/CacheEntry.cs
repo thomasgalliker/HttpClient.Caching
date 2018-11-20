@@ -2,8 +2,6 @@
 // Type: Microsoft.Extensions.Caching.Memory.CacheEntry
 // Assembly: Microsoft.Extensions.Caching.Memory, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 // MVID: 78529ED0-C4AD-4926-BA4D-60032404EE9B
-// Assembly location: C:\Users\thomas\AppData\Local\Temp\Rar$DI01.488\Microsoft.Extensions.Caching.Memory.dll
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,7 +43,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
-                    throw new ArgumentOutOfRangeException("AbsoluteExpirationRelativeToNow", (object)value, "The relative expiration value must be positive.");
+                    throw new ArgumentOutOfRangeException(nameof(this.AbsoluteExpirationRelativeToNow), value, "The relative expiration value must be positive.");
                 }
 
                 this.absoluteExpirationRelativeToNow = value;
@@ -61,7 +59,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
-                    throw new ArgumentOutOfRangeException("SlidingExpiration", (object)value, "The sliding expiration value must be positive.");
+                    throw new ArgumentOutOfRangeException(nameof(this.SlidingExpiration), value, "The sliding expiration value must be positive.");
                 }
 
                 this.slidingExpiration = value;
@@ -74,7 +72,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 if (this.expirationTokens == null)
                 {
-                    this.expirationTokens = (IList<IChangeToken>)new List<IChangeToken>();
+                    this.expirationTokens = new List<IChangeToken>();
                 }
 
                 return this.expirationTokens;
@@ -87,7 +85,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 if (this._postEvictionCallbacks == null)
                 {
-                    this._postEvictionCallbacks = (IList<PostEvictionCallbackRegistration>)new List<PostEvictionCallbackRegistration>();
+                    this._postEvictionCallbacks = new List<PostEvictionCallbackRegistration>();
                 }
 
                 return this._postEvictionCallbacks;

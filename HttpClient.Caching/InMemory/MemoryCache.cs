@@ -276,7 +276,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 }
             }
 
-            int removalCountTarget = (int)((double)this.entries.Count * percentage);
+            int removalCountTarget = (int)(this.entries.Count * percentage);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries1);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries2);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries3);
