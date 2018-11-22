@@ -14,12 +14,12 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     entry to
         ///     expire.
         /// </summary>
-        public IList<IChangeToken> ExpirationTokens { get; } = (IList<IChangeToken>)new List<IChangeToken>();
+        public IList<IChangeToken> ExpirationTokens { get; } = new List<IChangeToken>();
 
         /// <summary>
         ///     Gets or sets the callbacks will be fired after the cache entry is evicted from the cache.
         /// </summary>
-        public IList<PostEvictionCallbackRegistration> PostEvictionCallbacks { get; } = (IList<PostEvictionCallbackRegistration>)new List<PostEvictionCallbackRegistration>();
+        public IList<PostEvictionCallbackRegistration> PostEvictionCallbacks { get; } = new List<PostEvictionCallbackRegistration>();
 
         /// <summary>
         ///     Gets or sets the priority for keeping the cache entry in the cache during a
@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
-                    throw new ArgumentOutOfRangeException("AbsoluteExpirationRelativeToNow", (object)value, "The relative expiration value must be positive.");
+                    throw new ArgumentOutOfRangeException(nameof(this.AbsoluteExpirationRelativeToNow), value, "The relative expiration value must be positive.");
                 }
 
                 this.absoluteExpirationRelativeToNow = value;
@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
-                    throw new ArgumentOutOfRangeException("SlidingExpiration", (object)value, "The sliding expiration value must be positive.");
+                    throw new ArgumentOutOfRangeException(nameof(this.SlidingExpiration), value, "The sliding expiration value must be positive.");
                 }
 
                 this.slidingExpiration = value;

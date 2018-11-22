@@ -85,10 +85,9 @@ namespace Microsoft.Extensions.Caching.InMemory
             }
 
             entry.LastAccessed = utcNow;
-            CacheEntry cacheEntry;
-            if (this.entries.TryGetValue(entry.Key, out cacheEntry))
+            if (this.entries.TryGetValue(entry.Key, out var cacheEntry))
             {
-                cacheEntry.SetExpired((EvictionReason)2);
+                cacheEntry.SetExpired(EvictionReason.Replaced);
             }
 
             if (!entry.CheckExpired(utcNow))
@@ -142,7 +141,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             }
 
             this.CheckDisposed();
-            result = (object)null;
+            result = null;
             DateTimeOffset utcNow = this.clock.UtcNow;
             bool flag = false;
             CacheEntry entry;
@@ -176,7 +175,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             CacheEntry cacheEntry;
             if (this.entries.TryRemove(key, out cacheEntry))
             {
-                cacheEntry.SetExpired((EvictionReason)1);
+                cacheEntry.SetExpired(EvictionReason.Removed);
                 cacheEntry.InvokeEvictionCallbacks();
             }
 
@@ -189,10 +188,9 @@ namespace Microsoft.Extensions.Caching.InMemory
             var keys = this.entries.Keys.ToList();
             foreach (var key in keys)
             {
-                CacheEntry cacheEntry;
-                if (this.entries.TryRemove(key, out cacheEntry))
+                if (this.entries.TryRemove(key, out var cacheEntry))
                 {
-                    cacheEntry.SetExpired((EvictionReason)1);
+                    cacheEntry.SetExpired(EvictionReason.Removed);
                     cacheEntry.InvokeEvictionCallbacks();
                 }
             }
@@ -227,15 +225,14 @@ namespace Microsoft.Extensions.Caching.InMemory
             this.lastExpirationScan = utcNow;
             TaskFactory factory = Task.Factory;
             CancellationToken none = CancellationToken.None;
-            int num = 8;
             TaskScheduler scheduler = TaskScheduler.Default;
-            factory.StartNew((Action<object>)(state => ScanForExpiredItems((MemoryCache)state)), (object)this, none, (TaskCreationOptions)num, scheduler);
+            factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this, none, TaskCreationOptions.DenyChildAttach, scheduler);
         }
 
         private static void ScanForExpiredItems(MemoryCache cache)
         {
             DateTimeOffset utcNow = cache.clock.UtcNow;
-            foreach (CacheEntry entry in (IEnumerable<CacheEntry>)cache.entries.Values)
+            foreach (var entry in cache.entries.Values)
             {
                 if (entry.CheckExpired(utcNow))
                 {
@@ -279,11 +276,11 @@ namespace Microsoft.Extensions.Caching.InMemory
                 }
             }
 
-            int removalCountTarget = (int)((double)this.entries.Count * percentage);
+            int removalCountTarget = (int)(this.entries.Count * percentage);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries1);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries2);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries3);
-            foreach (CacheEntry entry in entriesToRemove)
+            foreach (var entry in entriesToRemove)
             {
                 this.RemoveEntry(entry);
             }
@@ -300,16 +297,16 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 foreach (var priorityEntry in priorityEntries)
                 {
-                    priorityEntry.SetExpired((EvictionReason)5);
+                    priorityEntry.SetExpired(EvictionReason.Capacity);
                 }
 
-                entriesToRemove.AddRange((IEnumerable<CacheEntry>)priorityEntries);
+                entriesToRemove.AddRange(priorityEntries);
             }
             else
             {
                 foreach (var cacheEntry in priorityEntries.OrderBy(entry => entry.LastAccessed))
                 {
-                    cacheEntry.SetExpired((EvictionReason)5);
+                    cacheEntry.SetExpired(EvictionReason.Capacity);
                     entriesToRemove.Add(cacheEntry);
                     if (removalCountTarget <= entriesToRemove.Count)
                     {
@@ -333,7 +330,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             if (disposing)
             {
-                GC.SuppressFinalize((object)this);
+                GC.SuppressFinalize(this);
             }
 
             this.disposed = true;

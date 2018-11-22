@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Caching.Abstractions;
 
 namespace Microsoft.Extensions.Caching.InMemory
@@ -30,7 +29,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             if (expirationToken == null)
             {
-                throw new ArgumentNullException("expirationToken");
+                throw new ArgumentNullException(nameof(expirationToken));
             }
 
             entry.ExpirationTokens.Add(expirationToken);
@@ -42,7 +41,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="relative"></param>
         public static ICacheEntry SetAbsoluteExpiration(this ICacheEntry entry, TimeSpan relative)
         {
-            entry.AbsoluteExpirationRelativeToNow = new TimeSpan?(relative);
+            entry.AbsoluteExpirationRelativeToNow = relative;
             return entry;
         }
 
@@ -51,7 +50,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="absolute"></param>
         public static ICacheEntry SetAbsoluteExpiration(this ICacheEntry entry, DateTimeOffset absolute)
         {
-            entry.AbsoluteExpiration = new DateTimeOffset?(absolute);
+            entry.AbsoluteExpiration = absolute;
             return entry;
         }
 
@@ -63,7 +62,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="offset"></param>
         public static ICacheEntry SetSlidingExpiration(this ICacheEntry entry, TimeSpan offset)
         {
-            entry.SlidingExpiration = new TimeSpan?(offset);
+            entry.SlidingExpiration = offset;
             return entry;
         }
 
@@ -125,12 +124,12 @@ namespace Microsoft.Extensions.Caching.InMemory
             entry.AbsoluteExpirationRelativeToNow = options.AbsoluteExpirationRelativeToNow;
             entry.SlidingExpiration = options.SlidingExpiration;
             entry.Priority = options.Priority;
-            foreach (IChangeToken expirationToken in (IEnumerable<IChangeToken>)options.ExpirationTokens)
+            foreach (var expirationToken in options.ExpirationTokens)
             {
                 entry.AddExpirationToken(expirationToken);
             }
 
-            foreach (PostEvictionCallbackRegistration evictionCallback in (IEnumerable<PostEvictionCallbackRegistration>)options.PostEvictionCallbacks)
+            foreach (var evictionCallback in options.PostEvictionCallbacks)
             {
                 entry.RegisterPostEvictionCallback(evictionCallback.EvictionCallback, evictionCallback.State);
             }

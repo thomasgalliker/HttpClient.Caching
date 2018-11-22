@@ -2,8 +2,6 @@
 // Type: Microsoft.Extensions.Caching.Memory.CacheEntry
 // Assembly: Microsoft.Extensions.Caching.Memory, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
 // MVID: 78529ED0-C4AD-4926-BA4D-60032404EE9B
-// Assembly location: C:\Users\thomas\AppData\Local\Temp\Rar$DI01.488\Microsoft.Extensions.Caching.Memory.dll
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,7 +43,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
-                    throw new ArgumentOutOfRangeException("AbsoluteExpirationRelativeToNow", (object)value, "The relative expiration value must be positive.");
+                    throw new ArgumentOutOfRangeException(nameof(this.AbsoluteExpirationRelativeToNow), value, "The relative expiration value must be positive.");
                 }
 
                 this.absoluteExpirationRelativeToNow = value;
@@ -61,7 +59,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
-                    throw new ArgumentOutOfRangeException("SlidingExpiration", (object)value, "The sliding expiration value must be positive.");
+                    throw new ArgumentOutOfRangeException(nameof(this.SlidingExpiration), value, "The sliding expiration value must be positive.");
                 }
 
                 this.slidingExpiration = value;
@@ -74,7 +72,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 if (this.expirationTokens == null)
                 {
-                    this.expirationTokens = (IList<IChangeToken>)new List<IChangeToken>();
+                    this.expirationTokens = new List<IChangeToken>();
                 }
 
                 return this.expirationTokens;
@@ -87,7 +85,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 if (this._postEvictionCallbacks == null)
                 {
-                    this._postEvictionCallbacks = (IList<PostEvictionCallbackRegistration>)new List<PostEvictionCallbackRegistration>();
+                    this._postEvictionCallbacks = new List<PostEvictionCallbackRegistration>();
                 }
 
                 return this._postEvictionCallbacks;
@@ -161,7 +159,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             if (this.absoluteExpiration.HasValue && this.absoluteExpiration.Value <= now)
             {
-                this.SetExpired((EvictionReason)3);
+                this.SetExpired(EvictionReason.Expired);
                 return true;
             }
 
@@ -171,7 +169,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 TimeSpan? slidingExpiration = this.slidingExpiration;
                 if ((slidingExpiration.HasValue ? (timeSpan >= slidingExpiration.GetValueOrDefault() ? 1 : 0) : 0) != 0)
                 {
-                    this.SetExpired((EvictionReason)3);
+                    this.SetExpired(EvictionReason.Expired);
                     return true;
                 }
             }
@@ -187,7 +185,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 {
                     if (this.expirationTokens[index].HasChanged)
                     {
-                        this.SetExpired((EvictionReason)4);
+                        this.SetExpired(EvictionReason.TokenExpired);
                         return true;
                     }
                 }
@@ -223,12 +221,12 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         private static void ExpirationTokensExpired(object obj)
         {
-            Task.Factory.StartNew((Action<object>)(state =>
+            Task.Factory.StartNew(state =>
             {
-                CacheEntry cacheEntry = (CacheEntry)state;
-                cacheEntry.SetExpired((EvictionReason)4);
+                var cacheEntry = (CacheEntry)state;
+                cacheEntry.SetExpired(EvictionReason.TokenExpired);
                 cacheEntry._notifyCacheOfExpiration(cacheEntry);
-            }), obj, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            }, obj, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
         private void DetachTokens()
@@ -242,9 +240,9 @@ namespace Microsoft.Extensions.Caching.InMemory
                 }
 
                 this.expirationTokenRegistrations = null;
-                for (int i = 0; i < tokenRegistrations.Count; ++i)
+                foreach (var disposable in tokenRegistrations)
                 {
-                    tokenRegistrations[i].Dispose();
+                    disposable.Dispose();
                 }
             }
         }
@@ -258,22 +256,20 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             TaskFactory factory = Task.Factory;
             CancellationToken none = CancellationToken.None;
-            int num = 8;
             TaskScheduler scheduler = TaskScheduler.Default;
-            factory.StartNew((Action<object>)(state => InvokeCallbacks((CacheEntry)state)), (object)this, none, (TaskCreationOptions)num, scheduler);
+            factory.StartNew((Action<object>)(state => InvokeCallbacks((CacheEntry)state)), (object)this, none, TaskCreationOptions.DenyChildAttach, scheduler);
         }
 
         private static void InvokeCallbacks(CacheEntry entry)
         {
-            IList<PostEvictionCallbackRegistration> callbackRegistrationList = Interlocked.Exchange<IList<PostEvictionCallbackRegistration>>(ref entry._postEvictionCallbacks, (IList<PostEvictionCallbackRegistration>)null);
+            var callbackRegistrationList = Interlocked.Exchange(ref entry._postEvictionCallbacks, null);
             if (callbackRegistrationList == null)
             {
                 return;
             }
 
-            for (int index = 0; index < ((ICollection<PostEvictionCallbackRegistration>)callbackRegistrationList).Count; ++index)
+            foreach (var callbackRegistration in callbackRegistrationList)
             {
-                PostEvictionCallbackRegistration callbackRegistration = callbackRegistrationList[index];
                 try
                 {
                     PostEvictionDelegate evictionCallback = callbackRegistration.EvictionCallback;
