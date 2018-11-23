@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Abstractions;
 using Microsoft.Extensions.Caching.InMemory;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using Tracing;
 using WpfSample.Extensions;
 
@@ -18,7 +14,6 @@ namespace WpfSample.Services
 {
     public class ApiService : IDisposable
     {
-        private readonly JsonSerializerSettings serializerSettings;
         private readonly HttpClient httpClient;
         private readonly IMemoryCache memoryCache;
         private readonly ITracer tracer;
@@ -62,15 +57,6 @@ namespace WpfSample.Services
 
             this.tracer = tracer;
             this.memoryCache = memoryCache;
-
-            this.serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                NullValueHandling = NullValueHandling.Ignore
-            };
-
-            this.serializerSettings.Converters.Add(new StringEnumConverter());
         }
 
         public async Task<string> GetAsync(string uri)
@@ -95,7 +81,7 @@ namespace WpfSample.Services
 
             var httpResponseMessage = await this.httpClient.GetAsync(uri);
             var jsonResponse = await this.HandleResponse(httpResponseMessage);
-            result = await Task.Run(() => JsonConvert.DeserializeObject<TResult>(jsonResponse, this.serializerSettings));
+            result = await Task.Run(() => JsonConvert.DeserializeObject<TResult>(jsonResponse));
 
             if (caching)
             {

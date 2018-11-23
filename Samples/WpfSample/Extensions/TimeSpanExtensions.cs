@@ -6,7 +6,7 @@ namespace WpfSample.Extensions
     {
         public static string ToSecondsString(this TimeSpan timeSpan)
         {
-            return $"{timeSpan.TotalSeconds:0.000}s";
+            return $"{timeSpan.TotalSeconds:0.0000}s";
         }
     }
 }

@@ -76,13 +76,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\City.cs" />
+    <Compile Include="Model\Clouds.cs" />
+    <Compile Include="Model\Coord.cs" />
+    <Compile Include="Model\Main.cs" />
+    <Compile Include="Model\Sys.cs" />
     <Compile Include="Model\Weather.cs" />
-    <Compile Include="Services\ApiService.cs" />
+    <Compile Include="Model\WeatherForecastRoot.cs" />
+    <Compile Include="Model\WeatherRoot.cs" />
+    <Compile Include="Model\Wind.cs" />
     <Compile Include="Extensions\TimeSpanExtensions.cs" />
-    <Compile Include="Services\IApiServiceConfiguration.cs" />
+    <Compile Include="Model\Units.cs" />
+    <Compile Include="Services\ILocationService.cs" />
+    <Compile Include="Services\IWeatherService.cs" />
     <Compile Include="Services\WeatherService.cs" />
+    <Compile Include="Services\LocationService.cs" />
     <Compile Include="ViewModels\WeatherViewModel.cs" />
-    <Page Include="Views\MainWindow.xaml">
+    <Page Include="Views\WeatherView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -90,8 +100,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Views\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
+    <Compile Include="Views\WeatherView.xaml.cs">
+      <DependentUpon>WeatherView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using Tracing;
 using WpfSample.Model;
 using WpfSample.Services;
 
@@ -11,57 +13,47 @@ namespace WpfSample.ViewModels
 {
     public class WeatherViewModel : ViewModelBase
     {
-        WeatherService WeatherService { get; } = new WeatherService();
+        private readonly IWeatherService weatherService;
+        private readonly ILocationService locationService;
 
-        public string Location
-        {
-            get { return this.location; }
-            set
-            {
-                this.Set(ref this.location, value, nameof(this.Location));
-            }
-        }
-
-        string temp = string.Empty;
-
-        public string Temp
-        {
-            get { return this.temp; }
-            set
-            {
-                this.Set(ref this.temp, value, nameof(this.Temp));
-            }
-        }
-
-        string condition = string.Empty;
-
-        public string Condition
-        {
-            get { return this.condition; }
-            set
-            {
-                this.Set(ref this.condition, value, nameof(this.Condition));
-            }
-        }
-
-        WeatherForecastRoot forecast;
-
-        public WeatherForecastRoot Forecast
-        {
-            get { return this.forecast; }
-            set
-            {
-                this.forecast = value;
-                this.RaisePropertyChanged(nameof(this.Forecast));
-            }
-        }
-
-        ICommand getWeather;
+        private string condition;
+        private WeatherForecastRoot forecast;
+        private ICommand getCurrentLocationCommand;
+        private ICommand getWeatherCommand;
         private string location;
+        private string temperature;
+        private bool isBusy;
+
+        public WeatherViewModel(ILocationService locationService, IWeatherService weatherService)
+        {
+            this.locationService = locationService;
+            this.weatherService = weatherService;
+
+            this.LoadCurrentLocation();
+        }
+
+        public ICommand GetCurrentLocationCommand =>
+            this.getCurrentLocationCommand ??
+            (this.getCurrentLocationCommand = new RelayCommand(async () => await this.LoadCurrentLocation(), () => !this.IsBusy));
+
+        private async Task LoadCurrentLocation()
+        {
+            try
+            {
+                // Get city name using location service
+                this.Location = await this.locationService.GetCity();
+            }
+            catch (Exception ex)
+            {
+                this.Location = "Cham, Switzerland";
+                this.Condition = $"{ex}";
+                Debug.WriteLine(ex.Message);
+            }
+        }
 
         public ICommand GetWeatherCommand =>
-            this.getWeather ??
-            (this.getWeather = new RelayCommand(async () => await this.ExecuteGetWeatherCommand()));
+            this.getWeatherCommand ??
+            (this.getWeatherCommand = new RelayCommand(async () => await this.ExecuteGetWeatherCommand(), () => !this.IsBusy));
 
         private async Task ExecuteGetWeatherCommand()
         {
@@ -75,19 +67,19 @@ namespace WpfSample.ViewModels
             {
                 const Units units = Units.Metric;
 
-                //Get weather by city
-                var weatherRoot = await this.WeatherService.GetWeather(this.Location.Trim(), units);
+                // Get weather by city
+                var weatherRoot = await this.weatherService.GetWeather(this.Location, units);
 
-                //Get forecast based on cityId
-                this.Forecast = await this.WeatherService.GetForecast(weatherRoot.CityId, units);
+                // Get forecast based on CityId
+                this.Forecast = await this.weatherService.GetForecast(weatherRoot.CityId, units);
 
-                var unit = "C";
-                this.Temp = $"Temp: {weatherRoot?.MainWeather?.Temperature ?? 0}°{unit}";
-                this.Condition = $"{weatherRoot.Name}: {weatherRoot?.Weather?[0]?.Description ?? string.Empty}";
+                this.Temperature = $"{weatherRoot?.MainWeather?.Temperature ?? 0}°C";
+                this.Condition = $"{weatherRoot.Name} (CityId {weatherRoot.CityId}): {weatherRoot?.Weather?[0]?.Description ?? string.Empty}";
             }
             catch (Exception ex)
             {
-                this.Temp = "Unable to get Weather";
+                this.Temperature = "N/A";
+                this.Condition = $"{this.Location}: {ex}";
                 Debug.WriteLine(ex.Message);
             }
             finally
@@ -96,6 +88,34 @@ namespace WpfSample.ViewModels
             }
         }
 
-        public bool IsBusy { get; set; }
+        public bool IsBusy
+        {
+            get => this.isBusy;
+            set => this.Set(ref this.isBusy, value, nameof(this.IsBusy));
+        }
+
+        public string Location
+        {
+            get => this.location;
+            set => this.Set(ref this.location, value, nameof(this.Location));
+        }
+
+        public string Temperature
+        {
+            get => this.temperature;
+            set => this.Set(ref this.temperature, value, nameof(this.Temperature));
+        }
+
+        public string Condition
+        {
+            get => this.condition;
+            set => this.Set(ref this.condition, value, nameof(this.Condition));
+        }
+
+        public WeatherForecastRoot Forecast
+        {
+            get => this.forecast;
+            set => this.Set(ref this.forecast, value, nameof(this.Forecast));
+        }
     }
 }
