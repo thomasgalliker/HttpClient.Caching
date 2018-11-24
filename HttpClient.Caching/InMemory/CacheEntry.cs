@@ -1,10 +1,7 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Microsoft.Extensions.Caching.Memory.CacheEntry
-// Assembly: Microsoft.Extensions.Caching.Memory, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60
-// MVID: 78529ED0-C4AD-4926-BA4D-60032404EE9B
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Abstractions;
@@ -16,10 +13,10 @@ namespace Microsoft.Extensions.Caching.InMemory
         private static readonly Action<object> ExpirationCallback = ExpirationTokensExpired;
         internal readonly object Lock = new object();
         private bool added;
-        private readonly Action<CacheEntry> _notifyCacheOfExpiration;
-        private readonly Action<CacheEntry> _notifyCacheEntryDisposed;
+        private readonly Action<CacheEntry> notifyCacheOfExpiration;
+        private readonly Action<CacheEntry> notifyCacheEntryDisposed;
         private IList<IDisposable> expirationTokenRegistrations;
-        private IList<PostEvictionCallbackRegistration> _postEvictionCallbacks;
+        private IList<PostEvictionCallbackRegistration> postEvictionCallbacks;
         private bool isExpired;
         internal IList<IChangeToken> expirationTokens;
         internal DateTimeOffset? absoluteExpiration;
@@ -39,9 +36,8 @@ namespace Microsoft.Extensions.Caching.InMemory
             get { return this.absoluteExpirationRelativeToNow; }
             set
             {
-                TimeSpan? nullable = value;
-                TimeSpan zero = TimeSpan.Zero;
-                if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
+                var nullable = value;
+                if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= TimeSpan.Zero ? 1 : 0) : 0) != 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(this.AbsoluteExpirationRelativeToNow), value, "The relative expiration value must be positive.");
                 }
@@ -55,9 +51,8 @@ namespace Microsoft.Extensions.Caching.InMemory
             get { return this.slidingExpiration; }
             set
             {
-                TimeSpan? nullable = value;
-                TimeSpan zero = TimeSpan.Zero;
-                if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
+                var nullable = value;
+                if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= TimeSpan.Zero ? 1 : 0) : 0) != 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(this.SlidingExpiration), value, "The sliding expiration value must be positive.");
                 }
@@ -83,12 +78,12 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             get
             {
-                if (this._postEvictionCallbacks == null)
+                if (this.postEvictionCallbacks == null)
                 {
-                    this._postEvictionCallbacks = new List<PostEvictionCallbackRegistration>();
+                    this.postEvictionCallbacks = new List<PostEvictionCallbackRegistration>();
                 }
 
-                return this._postEvictionCallbacks;
+                return this.postEvictionCallbacks;
             }
         }
 
@@ -109,17 +104,17 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             if (notifyCacheEntryDisposed == null)
             {
-                throw new ArgumentNullException("notifyCacheEntryDisposed");
+                throw new ArgumentNullException(nameof(notifyCacheEntryDisposed));
             }
 
             if (notifyCacheOfExpiration == null)
             {
-                throw new ArgumentNullException("notifyCacheOfExpiration");
+                throw new ArgumentNullException(nameof(notifyCacheOfExpiration));
             }
 
             this.Key = key;
-            this._notifyCacheEntryDisposed = notifyCacheEntryDisposed;
-            this._notifyCacheOfExpiration = notifyCacheOfExpiration;
+            this.notifyCacheEntryDisposed = notifyCacheEntryDisposed;
+            this.notifyCacheOfExpiration = notifyCacheOfExpiration;
         }
 
         public void Dispose()
@@ -130,7 +125,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             }
 
             this.added = true;
-            this._notifyCacheEntryDisposed(this);
+            this.notifyCacheEntryDisposed(this);
             //this.PropagateOptions(_added);
         }
 
@@ -225,7 +220,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 var cacheEntry = (CacheEntry)state;
                 cacheEntry.SetExpired(EvictionReason.TokenExpired);
-                cacheEntry._notifyCacheOfExpiration(cacheEntry);
+                cacheEntry.notifyCacheOfExpiration(cacheEntry);
             }, obj, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
@@ -249,7 +244,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         internal void InvokeEvictionCallbacks()
         {
-            if (this._postEvictionCallbacks == null)
+            if (this.postEvictionCallbacks == null)
             {
                 return;
             }
@@ -262,7 +257,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         private static void InvokeCallbacks(CacheEntry entry)
         {
-            var callbackRegistrationList = Interlocked.Exchange(ref entry._postEvictionCallbacks, null);
+            var callbackRegistrationList = Interlocked.Exchange(ref entry.postEvictionCallbacks, null);
             if (callbackRegistrationList == null)
             {
                 return;
@@ -272,18 +267,19 @@ namespace Microsoft.Extensions.Caching.InMemory
             {
                 try
                 {
-                    PostEvictionDelegate evictionCallback = callbackRegistration.EvictionCallback;
+                    var evictionCallback = callbackRegistration.EvictionCallback;
                     if (evictionCallback != null)
                     {
-                        object key = entry.Key;
-                        object obj = entry.Value;
-                        EvictionReason evictionReason = entry.EvictionReason;
-                        object state = callbackRegistration.State;
+                        var key = entry.Key;
+                        var obj = entry.Value;
+                        var evictionReason = entry.EvictionReason;
+                        var state = callbackRegistration.State;
                         evictionCallback.Invoke(key, obj, evictionReason, state);
                     }
                 }
                 catch (Exception ex)
                 {
+                    Trace.WriteLine($"{ex}");
                 }
             }
         }
@@ -301,12 +297,12 @@ namespace Microsoft.Extensions.Caching.InMemory
                 {
                     lock (parent.Lock)
                     {
-                        using (IEnumerator<IChangeToken> resource_0 = ((IEnumerable<IChangeToken>)this.expirationTokens).GetEnumerator())
+                        using (var changeTokenEnumerator = this.expirationTokens.GetEnumerator())
                         {
-                            while (((IEnumerator)resource_0).MoveNext())
+                            while (changeTokenEnumerator.MoveNext())
                             {
-                                IChangeToken local_5 = resource_0.Current;
-                                CacheEntryExtensions.AddExpirationToken((ICacheEntry)parent, local_5);
+                                var changeToken = changeTokenEnumerator.Current;
+                                parent.AddExpirationToken(changeToken);
                             }
                         }
                     }
@@ -320,9 +316,9 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             if (parent.absoluteExpiration.HasValue)
             {
-                DateTimeOffset? absoluteExpiration1 = this.absoluteExpiration;
-                DateTimeOffset? absoluteExpiration2 = parent.absoluteExpiration;
-                if ((absoluteExpiration1.HasValue & absoluteExpiration2.HasValue ? (absoluteExpiration1.GetValueOrDefault() < absoluteExpiration2.GetValueOrDefault() ? 1 : 0) : 0) == 0)
+                var absoluteExpiration = this.absoluteExpiration;
+                var parentAbsoluteExpiration = parent.absoluteExpiration;
+                if ((absoluteExpiration.HasValue & parentAbsoluteExpiration.HasValue ? (absoluteExpiration.GetValueOrDefault() < parentAbsoluteExpiration.GetValueOrDefault() ? 1 : 0) : 0) == 0)
                 {
                     return;
                 }
