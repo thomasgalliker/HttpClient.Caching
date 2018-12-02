@@ -12,6 +12,9 @@ Use the following command to install HttpClient.Caching using NuGet package mana
 
 You can use this library in any .Net project which is compatible to .Net Framework 4.5+ and .Net Standard 1.2+ (e.g. Xamarin Android, iOS, Universal Windows Platform, etc.)
 
+### The Purpose of HTTP Caching
+HTTP Caching affects both involved communication peers, the client and the server. On the server-side, caching is appropriate for improving throughput (scalability). HTTP caching doesn't make a single HTTP call faster but it can lead to better response performance in high-load scenarios. On the client-side, caching is used to avoid unnecessarily repetitiv HTTP calls. This leads to less waiting time on the client-side since cache reads have naturally a much better response performance than HTTP calls over relatively slow network links.
+
 ### API Usage
 #### Using MemoryCache
 Declare IMemoryCache in your API service, either by creating an instance manually or by injecting IMemoryCache into your API service class.
