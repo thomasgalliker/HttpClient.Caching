@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -279,7 +278,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine($"{ex}");
+                    Debug.WriteLine($"{ex}");
                 }
             }
         }
