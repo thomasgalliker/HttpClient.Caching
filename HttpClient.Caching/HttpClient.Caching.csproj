@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.2</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.2;netstandard2.0</TargetFrameworks>
     <Authors>Thomas Galliker</Authors>
     <Company>superdev GmbH</Company>
     <Description>HttpClient.Caching adds http response caching to HttpClient.</Description>
-    <Copyright>Copyright 2018</Copyright>
+    <Copyright>Copyright 2020</Copyright>
     <PackageProjectUrl>https://github.com/thomasgalliker/HttpClient.Caching</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/thomasgalliker/HttpClient.Caching/master/logo.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/thomasgalliker/HttpClient.Caching</RepositoryUrl>
@@ -16,12 +16,12 @@
     <NeutralLanguage>en</NeutralLanguage>
     <RootNamespace>Microsoft.Extensions.Caching</RootNamespace>
   </PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
