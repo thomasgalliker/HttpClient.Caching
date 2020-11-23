@@ -97,8 +97,23 @@ static void Main(string[] args)
 }
 ```
 
+Console output:
+```
+Attempt 1: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 625ms
+Attempt 2: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 48ms
+Attempt 3: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 1ms
+Attempt 4: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 1ms
+Attempt 5: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 1ms
+
+TotalRequests: 5
+-> CacheHit: 4
+-> CacheMiss: 1
+```
+
+
+
 ### Further Reading
 [How-to: HTTP Caching for RESTful & Hypermedia APIs](https://www.apiacademy.co/articles/2015/12/how-to-http-caching-for-restful-hypermedia-apis)
 
 ### License
-This project is Copyright &copy; 2018 [Thomas Galliker](https://ch.linkedin.com/in/thomasgalliker). Free for non-commercial use. For commercial use please contact the author.
+This project is Copyright &copy; 2020 [Thomas Galliker](https://ch.linkedin.com/in/thomasgalliker). Free for non-commercial use. For commercial use please contact the author.
