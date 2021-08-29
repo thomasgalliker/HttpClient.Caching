@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.2;netstandard2.0;net5.0</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.2;netstandard2.0;netstandard2.1</TargetFrameworks>
     <Authors>Thomas Galliker</Authors>
     <Company>superdev GmbH</Company>
     <Description>HttpClient.Caching adds http response caching to HttpClient.</Description>
