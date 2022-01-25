@@ -18,7 +18,12 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         private readonly IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode;
         private readonly IMemoryCache responseCache;
-        private readonly ICacheKeysProvider cacheKeysProvider;
+
+        /// <summary>
+        /// Cache key provider being used
+        /// </summary>
+        public ICacheKeysProvider CacheKeysProvider { get; }
+        
 
         /// <summary>
         ///     Create a new InMemoryCacheHandler.
@@ -40,9 +45,9 @@ namespace Microsoft.Extensions.Caching.InMemory
             IStatsProvider statsProvider = null,
             ICacheKeysProvider cacheKeysProvider = null)
             : this(
-                  innerHandler, 
-                  cacheExpirationPerHttpResponseCode, 
-                  statsProvider, 
+                  innerHandler,
+                  cacheExpirationPerHttpResponseCode,
+                  statsProvider,
                   new MemoryCache(new MemoryCacheOptions()),
                   cacheKeysProvider
                   )
@@ -64,9 +69,9 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="cache">The cache to be used.</param>
         /// <param name="cacheKeysProvider">The <see cref="ICacheKeysProvider"/> cache keys provider to use</param>
         internal InMemoryCacheHandler(
-            HttpMessageHandler innerHandler, 
-            IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode, 
-            IStatsProvider statsProvider, 
+            HttpMessageHandler innerHandler,
+            IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode,
+            IStatsProvider statsProvider,
             IMemoryCache cache,
             ICacheKeysProvider cacheKeysProvider)
             : base(innerHandler ?? new HttpClientHandler())
@@ -74,7 +79,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             this.StatsProvider = statsProvider ?? new StatsProvider(nameof(InMemoryCacheHandler));
             this.cacheExpirationPerHttpResponseCode = cacheExpirationPerHttpResponseCode ?? new Dictionary<HttpStatusCode, TimeSpan>();
             this.responseCache = cache ?? new MemoryCache(new MemoryCacheOptions());
-            this.cacheKeysProvider = cacheKeysProvider ?? new DefaultCacheKeysProvider();
+            this.CacheKeysProvider = cacheKeysProvider ?? new DefaultCacheKeysProvider();
         }
 
         /// <summary>
@@ -87,7 +92,8 @@ namespace Microsoft.Extensions.Caching.InMemory
             var methods = method != null ? new[] { method } : new[] { HttpMethod.Get, HttpMethod.Head };
             foreach (var m in methods)
             {
-                var key = m + uri.ToString();
+                var request = new HttpRequestMessage(m, uri);
+                var key = CacheKeysProvider.GetKey(request);
                 this.responseCache.Remove(key);
             }
         }
@@ -98,7 +104,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <returns>The HttpResponseMessage from cache, or a newly invoked one.</returns>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var key = this.cacheKeysProvider.GetKey(request);
+            var key = this.CacheKeysProvider.GetKey(request);
             // gets the data from cache, and returns the data if it's a cache hit
             if (request.Method == HttpMethod.Get || request.Method == HttpMethod.Head)
             {

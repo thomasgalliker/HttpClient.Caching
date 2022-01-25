@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Abstractions;
 using System;
 using System.Net.Http;
+using System.Text;
 
 namespace Microsoft.Extensions.Caching.InMemory
 {
@@ -14,7 +15,9 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     with <see cref="HttpRequestMessage.Method"/> and <see cref="HttpRequestMessage.RequestUri"/>
         /// </summary>
         /// <param name="request"></param>
-        /// <returns></returns>
+        /// <returns>
+        ///     An example of return value: "MET_GET;URI_https://www.google.it"
+        /// </returns>
         public string GetKey(HttpRequestMessage request)
         {
             if (request is null)
@@ -22,9 +25,12 @@ namespace Microsoft.Extensions.Caching.InMemory
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var key = request.Method + request.RequestUri.ToString();
+            var sb = new StringBuilder();
 
-            return key;
+            sb.AppendFormat("MET_{0};", request.Method);
+            sb.AppendFormat("URI_{0};", request.RequestUri);
+
+            return sb.ToString();
         }
     }
 }

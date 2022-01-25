@@ -28,17 +28,260 @@ namespace HttpClient.Caching.Tests.InMemory
             testMessageHandler.NumberOfCalls.Should().Be(1);
         }
 
+        /// <summary>
+        /// By using <see cref="MethodUriHeadersCacheKeysProvider"/> without any header then <see cref="InMemoryCacheHandler"/> should
+        /// behave like using <see cref="DefaultCacheKeysProvider"/>
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProvider()
+        {
+            // setup
+            var testMessageHandler = new TestMessageHandler();
+            // no headers is provided so ICacheKeyProvider MethodUriHeadersCacheKeysProvider should behave like DefaultCacheKeysProvider
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(null);
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+
+            // execute twice
+            await client.GetAsync("http://unittest");
+            await client.GetAsync("http://unittest");
+
+            // validate
+            testMessageHandler.NumberOfCalls.Should().Be(1);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with custom headers, but requests don't specify any header
+        /// used by cache key provider
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_NoHeaders()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(1);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with specific headers, 
+        /// both requests specify different value for the header
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_DifferentValues()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request1.Headers.Add("CUSTOM-HEADER", "Value1");
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request2.Headers.Add("CUSTOM-HEADER", "Value2");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(2);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with specific headers, 
+        /// one request specify a value for the header, the other none doesn't specify any hader value
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_HeaderValueInOneRequest()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request1.Headers.Add("CUSTOM-HEADER", "Value1");
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(2);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with specific headers, 
+        /// both requests specify same value for the header
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_SameValues()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request1.Headers.Add("CUSTOM-HEADER", "Value1");
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request2.Headers.Add("CUSTOM-HEADER", "Value1");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(1);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with specific headers, 
+        /// both requests specify same value for the headers
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_SameValues_MultipleHeaders()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER", "ANOTHER-HEADER", "HEADER3" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request1.Headers.Add("CUSTOM-HEADER", "Value1");
+            request1.Headers.Add("ANOTHER-HEADER", "Value2");
+            request1.Headers.Add("HEADER3", "Value3");
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request2.Headers.Add("CUSTOM-HEADER", "Value1");
+            request2.Headers.Add("ANOTHER-HEADER", "Value2");
+            request2.Headers.Add("HEADER3", "Value3");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(1);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with specific headers, 
+        /// both requests specify same value for the headers that are common but not all specific request contains the same
+        /// headers
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_SameValues_MultipleHeaders2()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER", "ANOTHER-HEADER", "HEADER3" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request1.Headers.Add("CUSTOM-HEADER", "Value1");
+            request1.Headers.Add("ANOTHER-HEADER", "Value2");
+            request1.Headers.Add("HEADER3", "Value3");
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request2.Headers.Add("CUSTOM-HEADER", "Value1");
+            request2.Headers.Add("HEADER3", "Value3");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(2);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with specific headers, 
+        /// both requests specify same value for the headers but in different order
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_SameValues_MultipleHeaders_DifferentOrder()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER", "ANOTHER-HEADER", "HEADER3" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request1.Headers.Add("CUSTOM-HEADER", "Value1");
+            request1.Headers.Add("HEADER3", "Value3");
+            request1.Headers.Add("ANOTHER-HEADER", "Value2");
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request2.Headers.Add("CUSTOM-HEADER", "Value1");
+            request2.Headers.Add("ANOTHER-HEADER", "Value2");
+            request2.Headers.Add("HEADER3", "Value3");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(1);
+        }
+
+        /// <summary>
+        /// <see cref="InMemoryCacheHandler"/> use <see cref="MethodUriHeadersCacheKeysProvider"/> with specific headers, 
+        /// both requests specify same value for specific header.
+        /// A request include some headers which aren't considered for cache key composition
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task CachesTheResult_MethodUriHeadersCacheKeysProviderWithCustomHeaders_SameValues2()
+        {
+            // arrange
+            var testMessageHandler = new TestMessageHandler();
+            var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "CUSTOM-HEADER" }); //this is the header that will be included in cache key generator
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheKeysProvider: cacheKeyProvider));
+            var request1 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request1.Headers.Add("CUSTOM-HEADER", "Value1");
+            request1.Headers.Add("ANOTHER-CUSTOM-HEADER", "ValueX"); // this header isn't considered for cache key composition
+            var request2 = new HttpRequestMessage(HttpMethod.Get, "http://unittest");
+            request2.Headers.Add("CUSTOM-HEADER", "Value1");
+
+            // act
+            // execute twice
+            await client.SendAsync(request1);
+            await client.SendAsync(request2);
+
+            // assert
+            testMessageHandler.NumberOfCalls.Should().Be(1);
+        }
+
         [Fact]
         public async Task GetsTheDataAgainAfterEntryIsGoneFromCache()
         {
             // setup
             var testMessageHandler = new TestMessageHandler();
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache, null));
+            var inMemoryCacheHandler = new InMemoryCacheHandler(testMessageHandler, null, null, cache, null);
+            var client = new System.Net.Http.HttpClient(inMemoryCacheHandler);
 
             // execute twice
             await client.GetAsync("http://unittest");
-            cache.Remove(HttpMethod.Get + new Uri("http://unittest").ToString());
+            var request = new HttpRequestMessage(HttpMethod.Get, new Uri("http://unittest"));
+            cache.Remove(inMemoryCacheHandler.CacheKeysProvider.GetKey(request));
             await client.GetAsync("http://unittest");
 
             // validate
