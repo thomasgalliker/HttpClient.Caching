@@ -34,7 +34,7 @@ namespace HttpClient.Caching.Tests.InMemory
             // setup
             var testMessageHandler = new TestMessageHandler();
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache));
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache, null));
 
             // execute twice
             await client.GetAsync("http://unittest");
@@ -51,7 +51,7 @@ namespace HttpClient.Caching.Tests.InMemory
             // setup
             var testMessageHandler = new TestMessageHandler();
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache));
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache, null));
 
             // execute for different URLs, only different by casing
             await client.GetAsync("http://unittest/foo.html");
@@ -67,7 +67,7 @@ namespace HttpClient.Caching.Tests.InMemory
             // setup
             var testMessageHandler = new TestMessageHandler();
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache));
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache, null));
 
             // execute for different URLs
             await client.GetAsync("http://unittest1");
@@ -83,7 +83,7 @@ namespace HttpClient.Caching.Tests.InMemory
             // setup
             var testMessageHandler = new TestMessageHandler();
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache));
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache, null));
 
             // execute twice for different methods
             await client.PostAsync("http://unittest", new StringContent(string.Empty));
@@ -102,7 +102,7 @@ namespace HttpClient.Caching.Tests.InMemory
         {
             var testMessageHandler = new TestMessageHandler();
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache));
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache, null));
 
             // execute twice for different methods
             await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, "http://unittest"));
@@ -118,7 +118,7 @@ namespace HttpClient.Caching.Tests.InMemory
             // setup
             var testMessageHandler = new TestMessageHandler();
             var cache = new MemoryCache(new MemoryCacheOptions());
-            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache));
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, null, null, cache, null));
 
             // execute twice for different methods
             var originalResult = await client.GetAsync("http://unittest");
