@@ -113,9 +113,10 @@ TotalRequests: 5
 ### Cache keys
 
 By default, requests will be cached by using a key which is composed with http method and url (only HEAD and GET http methods are supported).
-If this default behavior isn't correct you can implement your own ICacheKeyProvider wich provides chache key starting from HttpRequestMessage.
+If this default behavior isn't enough **you can implement your own ICacheKeyProvider** wich provides **cache key** starting **from HttpRequestMessage**.
 
-The following example show how use a cache provider of type MethodUriHeadersCacheKeysProvider (evaluates http method, specified headers and url to compose a cache key)
+The following example show how use a cache provider of type MethodUriHeadersCacheKeysProvider.
+This cache key provider is already implemented and evaluates http method, specified headers and url to compose a cache key.
 with InMemoryCacheHandler.
 ```C#
 static void Main(string[] args)
