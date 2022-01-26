@@ -28,6 +28,8 @@ namespace HttpClient.Caching.Tests.InMemory
             testMessageHandler.NumberOfCalls.Should().Be(1);
         }
 
+        #region Tests with cache key provider MethodUriHeadersCacheKeysProvider
+
         /// <summary>
         /// By using <see cref="MethodUriHeadersCacheKeysProvider"/> without any header then <see cref="InMemoryCacheHandler"/> should
         /// behave like using <see cref="DefaultCacheKeysProvider"/>
@@ -268,6 +270,8 @@ namespace HttpClient.Caching.Tests.InMemory
             // assert
             testMessageHandler.NumberOfCalls.Should().Be(1);
         }
+
+        #endregion Tests with cache key provider MethodUriHeadersCacheKeysProvider
 
         [Fact]
         public async Task GetsTheDataAgainAfterEntryIsGoneFromCache()
