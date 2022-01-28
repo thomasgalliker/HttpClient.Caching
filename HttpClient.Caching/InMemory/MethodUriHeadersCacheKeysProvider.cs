@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// </summary>
         /// <param name="request"></param>
         /// <returns>
-        ///     An example of return value: "MET_GET;HEA_X-KID_389dfhuif;URI_https://www.google.it"
+        ///     An example of return value: "MET_GET;HEA_X-KID_389dfhuif;URI_https://www.google.it?par1=65&par2=20;"
         /// </returns>
         public string GetKey(HttpRequestMessage request)
         {
