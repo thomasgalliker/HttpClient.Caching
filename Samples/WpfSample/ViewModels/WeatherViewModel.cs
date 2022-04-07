@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using Tracing;
 using WpfSample.Model;
 using WpfSample.Services;
 
@@ -29,7 +27,7 @@ namespace WpfSample.ViewModels
             this.locationService = locationService;
             this.weatherService = weatherService;
 
-            this.LoadCurrentLocation();
+            _ = this.LoadCurrentLocation();
         }
 
         public ICommand GetCurrentLocationCommand =>
