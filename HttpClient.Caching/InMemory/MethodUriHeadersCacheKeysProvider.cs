@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Caching.Abstractions;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using Microsoft.Extensions.Caching.Abstractions;
 
 namespace Microsoft.Extensions.Caching.InMemory
 {
@@ -20,7 +20,9 @@ namespace Microsoft.Extensions.Caching.InMemory
         public MethodUriHeadersCacheKeysProvider(string[] headersName)
         {
             if (headersName != null)
+            {
                 this.headersName = headersName.OrderBy(i => i).ToArray();
+            }
         }
 
         /// <summary>
@@ -41,13 +43,13 @@ namespace Microsoft.Extensions.Caching.InMemory
             var sb = new StringBuilder();
 
             sb.AppendFormat("MET_{0};", request.Method);
-            if (headersName != null)
+            if (this.headersName != null)
             {
-                foreach (var headerName in headersName)
+                foreach (var headerName in this.headersName)
                 {
                     if (request.Headers.Contains(headerName))
                     {
-                        sb.AppendFormat("HEA_{0}_{1};", headerName, GetHeaderValue(request, headerName));
+                        sb.AppendFormat("HEA_{0}_{1};", headerName, this.GetHeaderValue(request, headerName));
                     }
                     else
                     {
@@ -73,14 +75,15 @@ namespace Microsoft.Extensions.Caching.InMemory
                 throw new ArgumentException($"'{nameof(headerName)}' cannot be null or empty.", nameof(headerName));
             }
 
-            string retVal = string.Empty;
+            var retVal = string.Empty;
 
             var headerValues = request.Headers.GetValues(headerName);
+            if (headerValues != null)
+            {
+                retVal = string.Join(",", headerValues.OrderBy(i => i));
+            }
 
-            if (headerValues == null)
-                return retVal;
-
-            return string.Join(",", headerValues.OrderBy(i => i));
+            return retVal;
         }
     }
 }

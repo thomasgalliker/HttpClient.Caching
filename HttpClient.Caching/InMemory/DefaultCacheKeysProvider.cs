@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Caching.Abstractions;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Text;
+using Microsoft.Extensions.Caching.Abstractions;
 
 namespace Microsoft.Extensions.Caching.InMemory
 {
