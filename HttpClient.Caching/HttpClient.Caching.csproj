@@ -36,8 +36,12 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'NETFRAMEWORK' ">
-		<Reference Include="System" />
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="[11.0.2,)" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+		<Reference Include="System.Net.Http" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -46,5 +50,4 @@
 			<PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
-
 </Project>
