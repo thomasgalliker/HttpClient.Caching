@@ -1,9 +1,6 @@
 # HttpClient.Caching
 [![Version](https://img.shields.io/nuget/v/HttpClient.Caching.svg)](https://www.nuget.org/packages/HttpClient.Caching)  [![Downloads](https://img.shields.io/nuget/dt/HttpClient.Caching.svg)](https://www.nuget.org/packages/HttpClient.Caching)
 
-<img src="https://raw.githubusercontent.com/thomasgalliker/HttpClient.Caching/master/logo.png" alt="HttpClient.Caching" align="right" width=140>
-HttpClient.Caching adds http response caching to HttpClient.
-
 ### Download and Install HttpClient.Caching
 This library is available on NuGet: https://www.nuget.org/packages/HttpClient.Caching/
 Use the following command to install HttpClient.Caching using NuGet package manager console:
@@ -163,8 +160,7 @@ static void Main(string[] args)
 }
 ```
 
-
-### Further Reading
+### Links
 [How-to: HTTP Caching for RESTful & Hypermedia APIs](https://www.apiacademy.co/articles/2015/12/how-to-http-caching-for-restful-hypermedia-apis)
 
 ### License
