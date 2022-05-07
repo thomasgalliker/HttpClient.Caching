@@ -18,7 +18,7 @@ namespace HttpClient.Caching.Tests.Abstractions
             var mappings = new Dictionary<HttpStatusCode, TimeSpan> { { code, TimeSpan.FromTicks(ticks) } };
 
             // execute
-            TimeSpan result = code.GetAbsoluteExpirationRelativeToNow(mappings);
+            var result = code.GetAbsoluteExpirationRelativeToNow(mappings);
 
             // validate
             result.Should().Be(mappings[code]);
@@ -32,9 +32,9 @@ namespace HttpClient.Caching.Tests.Abstractions
             var mappings = CacheExpirationProvider.CreateSimple(TimeSpan.FromTicks(random.Next(0, 100000)), TimeSpan.FromTicks(random.Next(0, 100000)), TimeSpan.FromTicks(random.Next(0, 100000)));
 
             // execute
-            TimeSpan successResult = HttpStatusCode.Created.GetAbsoluteExpirationRelativeToNow(mappings);
-            TimeSpan clientErrorResult = HttpStatusCode.NotFound.GetAbsoluteExpirationRelativeToNow(mappings);
-            TimeSpan serverErrorResult = HttpStatusCode.GatewayTimeout.GetAbsoluteExpirationRelativeToNow(mappings);
+            var successResult = HttpStatusCode.Created.GetAbsoluteExpirationRelativeToNow(mappings);
+            var clientErrorResult = HttpStatusCode.NotFound.GetAbsoluteExpirationRelativeToNow(mappings);
+            var serverErrorResult = HttpStatusCode.GatewayTimeout.GetAbsoluteExpirationRelativeToNow(mappings);
 
             // validate
             successResult.Should().Be(mappings[HttpStatusCode.OK]);
@@ -49,7 +49,7 @@ namespace HttpClient.Caching.Tests.Abstractions
             var mappings = new Dictionary<HttpStatusCode, TimeSpan>();
 
             // execute
-            TimeSpan result = HttpStatusCode.OK.GetAbsoluteExpirationRelativeToNow(mappings);
+            var result = HttpStatusCode.OK.GetAbsoluteExpirationRelativeToNow(mappings);
 
             // validate
             result.Should().Be(TimeSpan.FromDays(1));

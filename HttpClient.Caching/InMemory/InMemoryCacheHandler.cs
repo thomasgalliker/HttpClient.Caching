@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// Cache key provider being used
         /// </summary>
         public ICacheKeysProvider CacheKeysProvider { get; }
-        
+
 
         /// <summary>
         ///     Create a new InMemoryCacheHandler.
@@ -93,7 +93,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             foreach (var m in methods)
             {
                 var request = new HttpRequestMessage(m, uri);
-                var key = CacheKeysProvider.GetKey(request);
+                var key = this.CacheKeysProvider.GetKey(request);
                 this.responseCache.Remove(key);
             }
         }

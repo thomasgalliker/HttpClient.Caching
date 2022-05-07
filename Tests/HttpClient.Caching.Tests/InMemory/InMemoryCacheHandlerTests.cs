@@ -386,7 +386,7 @@ namespace HttpClient.Caching.Tests.InMemory
             var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler));
 
             // execute 
-            HttpResponseMessage response = await client.GetAsync("http://unittest");
+            var response = await client.GetAsync("http://unittest");
 
             // validate
             response.Content.Headers.ContentType.MediaType.Should().Be("text/plain");
@@ -397,9 +397,10 @@ namespace HttpClient.Caching.Tests.InMemory
         public async Task DisableCachePerStatusCode()
         {
             // setup
-            var cacheExpirationPerStatusCode = new Dictionary<HttpStatusCode, TimeSpan>();
-
-            cacheExpirationPerStatusCode.Add((HttpStatusCode)200, TimeSpan.FromSeconds(0));
+            var cacheExpirationPerStatusCode = new Dictionary<HttpStatusCode, TimeSpan>
+            {
+                { (HttpStatusCode)200, TimeSpan.FromSeconds(0) }
+            };
 
             var testMessageHandler = new TestMessageHandler();
             var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler, cacheExpirationPerStatusCode));

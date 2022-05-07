@@ -7,9 +7,9 @@ using Microsoft.Extensions.Caching.InMemory;
 
 namespace ConsoleAppSample
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             const string url = "http://worldclockapi.com/api/json/utc/now";
 
@@ -39,7 +39,7 @@ namespace ConsoleAppSample
 
             Console.WriteLine();
 
-            StatsResult stats = handler.StatsProvider.GetStatistics();
+            var stats = handler.StatsProvider.GetStatistics();
             Console.WriteLine($"TotalRequests: {stats.Total.TotalRequests}");
             Console.WriteLine($"-> CacheHit: {stats.Total.CacheHit}");
             Console.WriteLine($"-> CacheMiss: {stats.Total.CacheMiss}");

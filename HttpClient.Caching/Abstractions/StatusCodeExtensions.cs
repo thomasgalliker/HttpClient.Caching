@@ -17,11 +17,10 @@ namespace Microsoft.Extensions.Caching.Abstractions
         /// <returns>A TimeSpan that should be used for the given status code when putting it into the cache.</returns>
         public static TimeSpan GetAbsoluteExpirationRelativeToNow(this HttpStatusCode statusCode, IDictionary<HttpStatusCode, TimeSpan> mapping)
         {
-            int code = (int)statusCode;
-            TimeSpan expiration;
+            var code = (int)statusCode;
 
             // get the expiration settings for the given status code
-            if (mapping.TryGetValue(statusCode, out expiration))
+            if (mapping.TryGetValue(statusCode, out var expiration))
             {
                 return expiration;
             }

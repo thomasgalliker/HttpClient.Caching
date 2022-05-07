@@ -19,8 +19,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             try
             {
-                byte[] binaryData = null;
-                if (cache.TryGetValue(key, out binaryData))
+                if (cache.TryGetValue(key, out byte[] binaryData))
                 {
                     return Task.FromResult(binaryData.Deserialize());
                 }
@@ -49,7 +48,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 cache.Set(key, value.Serialize(), absoluteExpirationRelativeToNow);
                 return Task.FromResult(true);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // ignore all exceptions
                 return Task.FromResult(false);

@@ -41,8 +41,8 @@ namespace Microsoft.Extensions.Caching.InMemory
             get { return this.absoluteExpirationRelativeToNow; }
             set
             {
-                TimeSpan? nullable = value;
-                TimeSpan zero = TimeSpan.Zero;
+                var nullable = value;
+                var zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(this.AbsoluteExpirationRelativeToNow), value, "The relative expiration value must be positive.");
@@ -61,8 +61,8 @@ namespace Microsoft.Extensions.Caching.InMemory
             get { return this.slidingExpiration; }
             set
             {
-                TimeSpan? nullable = value;
-                TimeSpan zero = TimeSpan.Zero;
+                var nullable = value;
+                var zero = TimeSpan.Zero;
                 if ((nullable.HasValue ? (nullable.GetValueOrDefault() <= zero ? 1 : 0) : 0) != 0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(this.SlidingExpiration), value, "The sliding expiration value must be positive.");

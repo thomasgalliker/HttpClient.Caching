@@ -49,12 +49,12 @@ namespace HttpClient.Caching.Tests.InMemory
             // Assert
             cacheKey.Should().Be("MET_GET;HEA_X-HEADER-1_Value1;URI_http://unittest/;");
         }
-        
+
         [Fact]
         public void ShouldGetKey_WithoutMatchingHeader()
         {
             // Arrange
-            var headersNames = new[] {  "X-HEADER-2", "X-HEADER-1" };
+            var headersNames = new[] { "X-HEADER-2", "X-HEADER-1" };
             var cacheKeysProvider = new MethodUriHeadersCacheKeysProvider(headersNames);
             var request = new HttpRequestMessage
             {
