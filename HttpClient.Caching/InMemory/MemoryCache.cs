@@ -19,15 +19,9 @@ namespace Microsoft.Extensions.Caching.InMemory
         private readonly TimeSpan expirationScanFrequency;
         private DateTimeOffset lastExpirationScan;
 
-        public int Count
-        {
-            get { return this.entries.Count; }
-        }
+        public int Count => this.entries.Count;
 
-        private ICollection<KeyValuePair<object, CacheEntry>> EntriesCollection
-        {
-            get { return this.entries; }
-        }
+        private ICollection<KeyValuePair<object, CacheEntry>> EntriesCollection => this.entries;
 
         public MemoryCache() : this(new MemoryCacheOptions())
         {
@@ -66,12 +60,12 @@ namespace Microsoft.Extensions.Caching.InMemory
                 return;
             }
 
-            DateTimeOffset utcNow = this.clock.UtcNow;
-            DateTimeOffset? nullable = new DateTimeOffset?();
+            var utcNow = this.clock.UtcNow;
+            var nullable = new DateTimeOffset?();
             if (entry.absoluteExpirationRelativeToNow.HasValue)
             {
-                DateTimeOffset dateTimeOffset = utcNow;
-                TimeSpan? expirationRelativeToNow = entry.absoluteExpirationRelativeToNow;
+                var dateTimeOffset = utcNow;
+                var expirationRelativeToNow = entry.absoluteExpirationRelativeToNow;
                 nullable = expirationRelativeToNow.HasValue ? dateTimeOffset + expirationRelativeToNow.GetValueOrDefault() : new DateTimeOffset?();
             }
             else if (entry.absoluteExpiration.HasValue)
@@ -142,10 +136,9 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             this.CheckDisposed();
             result = null;
-            DateTimeOffset utcNow = this.clock.UtcNow;
-            bool flag = false;
-            CacheEntry entry;
-            if (this.entries.TryGetValue(key, out entry))
+            var utcNow = this.clock.UtcNow;
+            var flag = false;
+            if (this.entries.TryGetValue(key, out var entry))
             {
                 if (entry.CheckExpired(utcNow) && entry.EvictionReason != EvictionReason.Replaced)
                 {
@@ -172,8 +165,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             }
 
             this.CheckDisposed();
-            CacheEntry cacheEntry;
-            if (this.entries.TryRemove(key, out cacheEntry))
+            if (this.entries.TryRemove(key, out var cacheEntry))
             {
                 cacheEntry.SetExpired(EvictionReason.Removed);
                 cacheEntry.InvokeEvictionCallbacks();
@@ -216,22 +208,22 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         private void StartScanForExpiredItems()
         {
-            DateTimeOffset utcNow = this.clock.UtcNow;
+            var utcNow = this.clock.UtcNow;
             if (!(this.expirationScanFrequency < utcNow - this.lastExpirationScan))
             {
                 return;
             }
 
             this.lastExpirationScan = utcNow;
-            TaskFactory factory = Task.Factory;
-            CancellationToken none = CancellationToken.None;
-            TaskScheduler scheduler = TaskScheduler.Default;
+            var factory = Task.Factory;
+            var none = CancellationToken.None;
+            var scheduler = TaskScheduler.Default;
             factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this, none, TaskCreationOptions.DenyChildAttach, scheduler);
         }
 
         private static void ScanForExpiredItems(MemoryCache cache)
         {
-            DateTimeOffset utcNow = cache.clock.UtcNow;
+            var utcNow = cache.clock.UtcNow;
             foreach (var entry in cache.entries.Values)
             {
                 if (entry.CheckExpired(utcNow))
@@ -243,13 +235,13 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         public void Compact(double percentage)
         {
-            List<CacheEntry> entriesToRemove = new List<CacheEntry>();
-            List<CacheEntry> priorityEntries1 = new List<CacheEntry>();
-            List<CacheEntry> priorityEntries2 = new List<CacheEntry>();
-            List<CacheEntry> priorityEntries3 = new List<CacheEntry>();
-            DateTimeOffset utcNow = this.clock.UtcNow;
+            var entriesToRemove = new List<CacheEntry>();
+            var priorityEntries1 = new List<CacheEntry>();
+            var priorityEntries2 = new List<CacheEntry>();
+            var priorityEntries3 = new List<CacheEntry>();
+            var utcNow = this.clock.UtcNow;
 
-            foreach (CacheEntry cacheEntry in this.entries.Values)
+            foreach (var cacheEntry in this.entries.Values)
             {
                 if (cacheEntry.CheckExpired(utcNow))
                 {
@@ -271,12 +263,12 @@ namespace Microsoft.Extensions.Caching.InMemory
                         case 3:
                             continue;
                         default:
-                            throw new NotSupportedException("Not implemented: " + (object)cacheEntry.Priority);
+                            throw new NotSupportedException("Not implemented: " + cacheEntry.Priority);
                     }
                 }
             }
 
-            int removalCountTarget = (int)(this.entries.Count * percentage);
+            var removalCountTarget = (int)(this.entries.Count * percentage);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries1);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries2);
             this.ExpirePriorityBucket(removalCountTarget, entriesToRemove, priorityEntries3);

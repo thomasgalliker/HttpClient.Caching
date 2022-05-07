@@ -8,9 +8,6 @@ namespace Microsoft.Extensions.Caching.InMemory.Internal
     public class SystemClock : ISystemClock
     {
         /// <summary>Retrieves the current system time in UTC.</summary>
-        public DateTimeOffset UtcNow
-        {
-            get { return DateTimeOffset.UtcNow; }
-        }
+        public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
     }
 }

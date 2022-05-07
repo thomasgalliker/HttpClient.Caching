@@ -159,8 +159,8 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             if (this.slidingExpiration.HasValue)
             {
-                TimeSpan timeSpan = now - this.LastAccessed;
-                TimeSpan? slidingExpiration = this.slidingExpiration;
+                var timeSpan = now - this.LastAccessed;
+                var slidingExpiration = this.slidingExpiration;
                 if ((slidingExpiration.HasValue ? (timeSpan >= slidingExpiration.GetValueOrDefault() ? 1 : 0) : 0) != 0)
                 {
                     this.SetExpired(EvictionReason.Expired);
@@ -175,7 +175,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             if (this.expirationTokens != null)
             {
-                for (int index = 0; index < ((ICollection<IChangeToken>)this.expirationTokens).Count; ++index)
+                for (var index = 0; index < this.expirationTokens.Count; ++index)
                 {
                     if (this.expirationTokens[index].HasChanged)
                     {
@@ -197,9 +197,9 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             lock (this.Lock)
             {
-                for (int i = 0; i < this.expirationTokens.Count; ++i)
+                for (var i = 0; i < this.expirationTokens.Count; ++i)
                 {
-                    IChangeToken expirationToken = this.expirationTokens[i];
+                    var expirationToken = this.expirationTokens[i];
                     if (expirationToken.ActiveChangeCallbacks)
                     {
                         if (this.expirationTokenRegistrations == null)
@@ -248,10 +248,10 @@ namespace Microsoft.Extensions.Caching.InMemory
                 return;
             }
 
-            TaskFactory factory = Task.Factory;
-            CancellationToken none = CancellationToken.None;
-            TaskScheduler scheduler = TaskScheduler.Default;
-            factory.StartNew((Action<object>)(state => InvokeCallbacks((CacheEntry)state)), (object)this, none, TaskCreationOptions.DenyChildAttach, scheduler);
+            var factory = Task.Factory;
+            var none = CancellationToken.None;
+            var scheduler = TaskScheduler.Default;
+            factory.StartNew(state => InvokeCallbacks((CacheEntry)state), this, none, TaskCreationOptions.DenyChildAttach, scheduler);
         }
 
         private static void InvokeCallbacks(CacheEntry entry)

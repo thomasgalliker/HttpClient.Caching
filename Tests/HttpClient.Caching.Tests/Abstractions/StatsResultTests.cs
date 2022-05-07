@@ -15,7 +15,7 @@ namespace HttpClient.Caching.Tests.Abstractions
             long hits = 0;
             long misses = 0;
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 stats.PerStatusCode.Add((HttpStatusCode)400 + i, new StatsValue { CacheHit = 2 * i, CacheMiss = i });
                 hits += 2 * i;

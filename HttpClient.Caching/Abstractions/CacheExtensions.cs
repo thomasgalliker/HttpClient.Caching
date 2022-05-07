@@ -8,22 +8,19 @@ namespace Microsoft.Extensions.Caching.Abstractions
     {
         public static object Get(this IMemoryCache cache, object key)
         {
-            object obj = null;
-            cache.TryGetValue(key, out obj);
+            cache.TryGetValue(key, out var obj);
             return obj;
         }
 
         public static TItem Get<TItem>(this IMemoryCache cache, object key)
         {
-            TItem obj;
-            cache.TryGetValue(key, out obj);
+            cache.TryGetValue(key, out TItem obj);
             return obj;
         }
 
         public static bool TryGetValue<TItem>(this IMemoryCache cache, object key, out TItem value)
         {
-            object obj;
-            if (cache.TryGetValue(key, out obj))
+            if (cache.TryGetValue(key, out var obj))
             {
                 value = (TItem)obj;
                 return true;
@@ -35,7 +32,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value)
         {
-            ICacheEntry entry = cache.CreateEntry(key);
+            var entry = cache.CreateEntry(key);
             entry.Value = value;
             entry.Dispose();
             return value;
@@ -43,7 +40,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, DateTimeOffset absoluteExpiration)
         {
-            ICacheEntry entry = cache.CreateEntry(key);
+            var entry = cache.CreateEntry(key);
             DateTimeOffset? nullable = absoluteExpiration;
             entry.AbsoluteExpiration = nullable;
             entry.Value = value;
@@ -53,7 +50,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, TimeSpan absoluteExpirationRelativeToNow)
         {
-            ICacheEntry entry = cache.CreateEntry(key);
+            var entry = cache.CreateEntry(key);
             TimeSpan? nullable = absoluteExpirationRelativeToNow;
             entry.AbsoluteExpirationRelativeToNow = nullable;
             entry.Value = value;
@@ -63,8 +60,8 @@ namespace Microsoft.Extensions.Caching.Abstractions
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, IChangeToken expirationToken)
         {
-            ICacheEntry entry = cache.CreateEntry(key);
-            IChangeToken expirationToken1 = expirationToken;
+            var entry = cache.CreateEntry(key);
+            var expirationToken1 = expirationToken;
             entry.AddExpirationToken(expirationToken1);
             entry.Value = value;
             entry.Dispose();
@@ -73,7 +70,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
 
         public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, MemoryCacheEntryOptions options)
         {
-            using (ICacheEntry entry = cache.CreateEntry(key))
+            using (var entry = cache.CreateEntry(key))
             {
                 if (options != null)
                 {
@@ -88,10 +85,9 @@ namespace Microsoft.Extensions.Caching.Abstractions
 
         public static TItem GetOrCreate<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, TItem> factory)
         {
-            object obj;
-            if (!cache.TryGetValue(key, out obj))
+            if (!cache.TryGetValue(key, out var obj))
             {
-                ICacheEntry entry = cache.CreateEntry(key);
+                var entry = cache.CreateEntry(key);
                 obj = factory(entry);
                 entry.SetValue(obj);
                 entry.Dispose();
@@ -102,10 +98,9 @@ namespace Microsoft.Extensions.Caching.Abstractions
 
         public static async Task<TItem> GetOrCreateAsync<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, Task<TItem>> factory)
         {
-            object obj;
-            if (!cache.TryGetValue(key, out obj))
+            if (!cache.TryGetValue(key, out var obj))
             {
-                ICacheEntry entry = cache.CreateEntry(key);
+                var entry = cache.CreateEntry(key);
                 obj = await factory(entry);
                 entry.SetValue(obj);
                 entry.Dispose();

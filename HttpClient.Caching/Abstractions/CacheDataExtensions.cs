@@ -7,8 +7,8 @@ namespace Microsoft.Extensions.Caching.Abstractions
     {
         public static byte[] Serialize(this CacheData cacheData)
         {
-            string json = JsonConvert.SerializeObject(cacheData);
-            byte[] bytes = new byte[json.Length * sizeof(char)];
+            var json = JsonConvert.SerializeObject(cacheData);
+            var bytes = new byte[json.Length * sizeof(char)];
             Buffer.BlockCopy(json.ToCharArray(), 0, bytes, 0, bytes.Length);
             return bytes;
         }
@@ -17,9 +17,9 @@ namespace Microsoft.Extensions.Caching.Abstractions
         {
             try
             {
-                char[] chars = new char[cacheData.Length / sizeof(char)];
+                var chars = new char[cacheData.Length / sizeof(char)];
                 Buffer.BlockCopy(cacheData, 0, chars, 0, cacheData.Length);
-                string json = new string(chars);
+                var json = new string(chars);
                 var data = JsonConvert.DeserializeObject<CacheData>(json);
                 return data;
             }

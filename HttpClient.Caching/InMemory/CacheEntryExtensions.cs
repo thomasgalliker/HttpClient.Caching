@@ -78,7 +78,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 throw new ArgumentNullException("callback");
             }
 
-            return entry.RegisterPostEvictionCallback(callback, (object)null);
+            return entry.RegisterPostEvictionCallback(callback, null);
         }
 
         /// <summary>

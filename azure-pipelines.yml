@@ -1,13 +1,13 @@
 ####################################################################
 # VSTS Build Configuration, Version 1.4
 #
-# (c)2021 superdev GmbH
+# (c)2022 superdev GmbH
 ####################################################################
 
 name: $[format('{0}', variables['buildName'])]
 
 pool:
-  vmImage: 'windows-2019'
+  vmImage: 'windows-2022'
 
 trigger:
   branches:
@@ -19,16 +19,14 @@ trigger:
 
   paths:
     exclude:
-    - README.md
-    - Images/*
-    - Samples/*
+    - Docs/*
 
 variables:
   solution: 'HttpClient.Caching.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   majorVersion: 1
-  minorVersion: 2
+  minorVersion: 3
   patchVersion: $[counter(format('{0}.{1}', variables.majorVersion, variables.minorVersion), 0)]
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     # Versioning: 1.0.0
@@ -69,31 +67,37 @@ steps:
     FailOnWarning: false
     DisableTelemetry: false'
 
-
 - task: NuGetToolInstaller@0
-  displayName: 'Use NuGet 5.x'
+  displayName: 'Use NuGet 6.x'
   inputs:
-    versionSpec: 5.x
+    versionSpec: 6.x
 
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   displayName: 'NuGet restore'
   inputs:
-    restoreSolution: '$(solution)'
+    command: restore
+    projects: '$(solution)'
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   displayName: 'Build solution'
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: ''
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
-    
+    projects: '$(solution)'
+    arguments: '--no-restore --configuration $(buildConfiguration)'
+
 - task: DotNetCoreCLI@2
   displayName: 'Run UnitTests'
   inputs:
     command: test
     projects: '**/*.Tests.csproj'
-    arguments: '--no-restore --no-build --configuration $(buildConfiguration)'
+    arguments: '--no-restore --no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" /p:CoverletOutput=UnitTests.coverage.cobertura.xml /p:MergeWith=$(Build.SourcesDirectory)/Tests/CoverletOutput/coverage.json /p:CoverletOutputFormat=cobertura'
+    
+- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+  displayName: 'Create Code Coverage Report'
+  inputs:
+    reports: '$(Build.SourcesDirectory)/Tests/**/*.coverage.cobertura*.xml'
+    targetdir: '$(Build.SourcesDirectory)/CodeCoverage'
+    reporttypes: 'Cobertura'
+    assemblyfilters: '-xunit*'
     
 - task: DotNetCoreCLI@2
   displayName: 'Pack HttpClient.Caching'
@@ -113,6 +117,13 @@ steps:
      **\bin\*.nupkg
 
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+     
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml'
+    reportDirectory: '$(Build.SourcesDirectory)/CodeCoverage'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'

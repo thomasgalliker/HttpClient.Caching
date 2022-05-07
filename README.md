@@ -1,9 +1,6 @@
 # HttpClient.Caching
 [![Version](https://img.shields.io/nuget/v/HttpClient.Caching.svg)](https://www.nuget.org/packages/HttpClient.Caching)  [![Downloads](https://img.shields.io/nuget/dt/HttpClient.Caching.svg)](https://www.nuget.org/packages/HttpClient.Caching)
 
-<img src="https://raw.githubusercontent.com/thomasgalliker/HttpClient.Caching/master/logo.png" alt="HttpClient.Caching" align="right" width=140>
-HttpClient.Caching adds http response caching to HttpClient.
-
 ### Download and Install HttpClient.Caching
 This library is available on NuGet: https://www.nuget.org/packages/HttpClient.Caching/
 Use the following command to install HttpClient.Caching using NuGet package manager console:
@@ -110,10 +107,61 @@ TotalRequests: 5
 -> CacheMiss: 1
 ```
 
+### Cache keys
 
+By default, requests will be cached by using a key which is composed with http method and url (only HEAD and GET http methods are supported).
+If this default behavior isn't enough **you can implement your own ICacheKeyProvider** wich provides **cache key** starting **from HttpRequestMessage**.
 
-### Further Reading
+The following example show how use a cache provider of type MethodUriHeadersCacheKeysProvider.
+This cache key provider is already implemented and evaluates http method, specified headers and url to compose a cache key.
+with InMemoryCacheHandler.
+```C#
+static void Main(string[] args)
+{
+    const string url = "http://worldclockapi.com/api/json/utc/now";
+
+    var httpClientHandler = new HttpClientHandler();
+    var cacheExpirationPerHttpResponseCode = CacheExpirationProvider.CreateSimple(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));
+    // this is a CacheKeyProvider which evaluates http method, specified headers and url to compose a key
+    var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "FIRST-HEADER", "SECOND-HEADER" });
+    var handler = new InMemoryCacheHandler(
+        innerHandler: httpClientHandler,
+        cacheExpirationPerHttpResponseCode: cacheExpirationPerHttpResponseCode,
+        cacheKeysProvider: cacheKeyProvider
+    );
+    
+    using (var client = new HttpClient(handler))
+    {
+        // HttpClient calls the same API endpoint five times:
+        // - The first attempt is called against the real API endpoint since no cache is available
+        // - Attempts 2 to 5 can be read from cache
+        for (var i = 1; i <= 5; i++)
+        {
+            Console.Write($"Attempt {i}: HTTP GET {url}...");
+            var stopwatch = Stopwatch.StartNew();
+            var result = client.GetAsync(url).GetAwaiter().GetResult();
+
+            // Do something useful with the returned content...
+            var content = result.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            Console.WriteLine($" completed in {stopwatch.ElapsedMilliseconds}ms");
+
+            // Artificial wait time...
+            Thread.Sleep(1000);
+        }
+    }
+
+    Console.WriteLine();
+
+    StatsResult stats = handler.StatsProvider.GetStatistics();
+    Console.WriteLine($"TotalRequests: {stats.Total.TotalRequests}");
+    Console.WriteLine($"-> CacheHit: {stats.Total.CacheHit}");
+    Console.WriteLine($"-> CacheMiss: {stats.Total.CacheMiss}");
+    Console.ReadKey();
+}
+```
+
+### Links
 [How-to: HTTP Caching for RESTful & Hypermedia APIs](https://www.apiacademy.co/articles/2015/12/how-to-http-caching-for-restful-hypermedia-apis)
 
 ### License
-This project is Copyright &copy; 2020 [Thomas Galliker](https://ch.linkedin.com/in/thomasgalliker). Free for non-commercial use. For commercial use please contact the author.
+This project is Copyright &copy; 2022 [Thomas Galliker](https://ch.linkedin.com/in/thomasgalliker). Free for non-commercial use. For commercial use please contact the author.

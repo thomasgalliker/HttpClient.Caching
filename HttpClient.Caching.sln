@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2011
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpClient.Caching", "HttpClient.Caching\HttpClient.Caching.csproj", "{CBA31ECF-3D41-4AF0-B966-7815F2AD25E9}"
 EndProject
@@ -11,15 +11,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpClient.Caching.Tests", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{755C7AC9-B66F-4FB3-9CFB-A6013586A5F7}"
 	ProjectSection(SolutionItems) = preProject
-		build.yml = build.yml
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		azure-pipelines.yml = azure-pipelines.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppSample", "Samples\ConsoleAppSample\ConsoleAppSample.csproj", "{592B2324-79AA-4973-8CE5-F65BD503641F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{2AB15A56-D5AC-4CBB-95BF-241051541E52}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfSample", "Samples\WpfSample\WpfSample.csproj", "{750EA219-7FAB-44F6-B909-BC678CFF4BE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,10 +39,6 @@ Global
 		{592B2324-79AA-4973-8CE5-F65BD503641F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{592B2324-79AA-4973-8CE5-F65BD503641F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{592B2324-79AA-4973-8CE5-F65BD503641F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{750EA219-7FAB-44F6-B909-BC678CFF4BE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{750EA219-7FAB-44F6-B909-BC678CFF4BE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{750EA219-7FAB-44F6-B909-BC678CFF4BE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{750EA219-7FAB-44F6-B909-BC678CFF4BE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,7 +46,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D8F20DC2-E69A-4432-A68B-FD4A8232BA43} = {82C933E0-5F3A-46DD-BE18-233590F11503}
 		{592B2324-79AA-4973-8CE5-F65BD503641F} = {2AB15A56-D5AC-4CBB-95BF-241051541E52}
-		{750EA219-7FAB-44F6-B909-BC678CFF4BE4} = {2AB15A56-D5AC-4CBB-95BF-241051541E52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46294172-BC59-4710-8105-CF322C619EA8}
