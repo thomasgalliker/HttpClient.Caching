@@ -20,6 +20,12 @@ namespace Microsoft.Extensions.Caching.InMemory
         private readonly IMemoryCache responseCache;
 
         /// <summary>
+        /// Cache key provider being used
+        /// </summary>
+        public ICacheKeysProvider CacheKeysProvider { get; }
+        
+
+        /// <summary>
         ///     Create a new InMemoryCacheHandler.
         /// </summary>
         /// <param name="innerHandler">The inner handler to retrieve the content from on cache misses.</param>
@@ -31,8 +37,20 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     An <see cref="IStatsProvider" /> that records statistic information about the caching
         ///     behavior.
         /// </param>
-        public InMemoryCacheHandler(HttpMessageHandler innerHandler = null, IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode = null, IStatsProvider statsProvider = null)
-            : this(innerHandler, cacheExpirationPerHttpResponseCode, statsProvider, new MemoryCache(new MemoryCacheOptions()))
+        /// <param name="cacheKeysProvider">
+        ///     An <see cref="ICacheKeysProvider"/> that provides keys to retrieve and store items in the cache
+        /// </param>
+        public InMemoryCacheHandler(HttpMessageHandler innerHandler = null,
+            IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode = null,
+            IStatsProvider statsProvider = null,
+            ICacheKeysProvider cacheKeysProvider = null)
+            : this(
+                  innerHandler,
+                  cacheExpirationPerHttpResponseCode,
+                  statsProvider,
+                  new MemoryCache(new MemoryCacheOptions()),
+                  cacheKeysProvider
+                  )
         {
         }
 
@@ -49,12 +67,19 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     behavior.
         /// </param>
         /// <param name="cache">The cache to be used.</param>
-        internal InMemoryCacheHandler(HttpMessageHandler innerHandler, IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode, IStatsProvider statsProvider, IMemoryCache cache)
+        /// <param name="cacheKeysProvider">The <see cref="ICacheKeysProvider"/> cache keys provider to use</param>
+        internal InMemoryCacheHandler(
+            HttpMessageHandler innerHandler,
+            IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode,
+            IStatsProvider statsProvider,
+            IMemoryCache cache,
+            ICacheKeysProvider cacheKeysProvider)
             : base(innerHandler ?? new HttpClientHandler())
         {
             this.StatsProvider = statsProvider ?? new StatsProvider(nameof(InMemoryCacheHandler));
             this.cacheExpirationPerHttpResponseCode = cacheExpirationPerHttpResponseCode ?? new Dictionary<HttpStatusCode, TimeSpan>();
             this.responseCache = cache ?? new MemoryCache(new MemoryCacheOptions());
+            this.CacheKeysProvider = cacheKeysProvider ?? new DefaultCacheKeysProvider();
         }
 
         /// <summary>
@@ -67,7 +92,8 @@ namespace Microsoft.Extensions.Caching.InMemory
             var methods = method != null ? new[] { method } : new[] { HttpMethod.Get, HttpMethod.Head };
             foreach (var m in methods)
             {
-                var key = m + uri.ToString();
+                var request = new HttpRequestMessage(m, uri);
+                var key = CacheKeysProvider.GetKey(request);
                 this.responseCache.Remove(key);
             }
         }
@@ -78,7 +104,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <returns>The HttpResponseMessage from cache, or a newly invoked one.</returns>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var key = request.Method + request.RequestUri.ToString();
+            var key = this.CacheKeysProvider.GetKey(request);
             // gets the data from cache, and returns the data if it's a cache hit
             if (request.Method == HttpMethod.Get || request.Method == HttpMethod.Head)
             {
