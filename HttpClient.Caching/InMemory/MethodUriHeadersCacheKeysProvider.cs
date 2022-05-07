@@ -51,13 +51,9 @@ namespace Microsoft.Extensions.Caching.InMemory
                     {
                         sb.AppendFormat("HEA_{0}_{1};", headerName, this.GetHeaderValue(request, headerName));
                     }
-                    else
-                    {
-                        sb.Append("HEA_;");
-                    }
-
                 }
             }
+
             sb.AppendFormat("URI_{0};", request.RequestUri);
 
             return sb.ToString();
@@ -75,15 +71,15 @@ namespace Microsoft.Extensions.Caching.InMemory
                 throw new ArgumentException($"'{nameof(headerName)}' cannot be null or empty.", nameof(headerName));
             }
 
-            var retVal = string.Empty;
+            var orderedHeaderValues = string.Empty;
 
             var headerValues = request.Headers.GetValues(headerName);
             if (headerValues != null)
             {
-                retVal = string.Join(",", headerValues.OrderBy(i => i));
+                orderedHeaderValues = string.Join(",", headerValues.OrderBy(i => i));
             }
 
-            return retVal;
+            return orderedHeaderValues;
         }
     }
 }
