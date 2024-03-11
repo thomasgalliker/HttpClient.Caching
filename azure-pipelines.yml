@@ -12,7 +12,7 @@ pool:
 trigger:
   branches:
     include:
-    - master
+    - main
     - develop
     - feature/*
     - bugfix/*
@@ -21,17 +21,25 @@ trigger:
     exclude:
     - Docs/*
 
+schedules:
+- cron: "0 0 1 * *"
+  displayName: At 00:00 on day-of-month 1
+  branches:
+    include:
+    - develop
+  always: true
+
 variables:
   solution: 'HttpClient.Caching.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   majorVersion: 1
-  minorVersion: 3
+  minorVersion: 4
   patchVersion: $[counter(format('{0}.{1}', variables.majorVersion, variables.minorVersion), 0)]
-  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
     # Versioning: 1.0.0
     semVersion: $[format('{0}.{1}.{2}', variables.majorVersion, variables.minorVersion, variables.patchVersion)]
-  ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), not(startsWith(variables['Build.SourceBranch'], 'refs/pull/'))) }}:
+  ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/pull/'))) }}:
     # Versioning: 1.0.0-pre
     semVersion: $[format('{0}.{1}.{2}-pre', variables.majorVersion, variables.minorVersion, variables.patchVersion)]
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
@@ -66,7 +74,12 @@ steps:
     LogLevel: 'verbose'
     FailOnWarning: false
     DisableTelemetry: false'
-
+    
+- task: UseDotNet@2
+  displayName: 'Use .NET 8.x'
+  inputs:
+    version: 8.x
+    
 - task: NuGetToolInstaller@0
   displayName: 'Use NuGet 6.x'
   inputs:
@@ -83,7 +96,7 @@ steps:
   inputs:
     projects: '$(solution)'
     arguments: '--no-restore --configuration $(buildConfiguration)'
-
+    
 - task: DotNetCoreCLI@2
   displayName: 'Run UnitTests'
   inputs:
@@ -106,6 +119,7 @@ steps:
     packagesToPack: HttpClient.Caching/HttpClient.Caching.csproj
     versioningScheme: byEnvVar
     versionEnvVar: semVersion
+    nobuild: true
 
 - task: CopyFiles@2
   displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
