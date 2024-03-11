@@ -12,12 +12,13 @@ namespace Microsoft.Extensions.Caching.InMemory
     public class MemoryCache : IMemoryCache
     {
         private readonly ConcurrentDictionary<object, CacheEntry> entries;
-        private bool disposed;
         private readonly Action<CacheEntry> setEntry;
         private readonly Action<CacheEntry> entryExpirationNotification;
         private readonly ISystemClock clock;
         private readonly TimeSpan expirationScanFrequency;
+
         private DateTimeOffset lastExpirationScan;
+        private bool disposed;
 
         public int Count => this.entries.Count;
 
@@ -110,10 +111,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                     entry.InvokeEvictionCallbacks();
                 }
 
-                if (cacheEntry != null)
-                {
-                    cacheEntry.InvokeEvictionCallbacks();
-                }
+                cacheEntry?.InvokeEvictionCallbacks();
             }
             else
             {

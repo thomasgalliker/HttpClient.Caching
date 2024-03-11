@@ -11,7 +11,7 @@ namespace ConsoleAppSample
     {
         private static void Main(string[] args)
         {
-            const string url = "http://worldclockapi.com/api/json/utc/now";
+            const string url = "http://worldtimeapi.org/api/timezone/Europe/Zurich";
 
             // HttpClient uses an HttpClientHandler nested into InMemoryCacheHandler in order to handle http get response caching
             var httpClientHandler = new HttpClientHandler();
