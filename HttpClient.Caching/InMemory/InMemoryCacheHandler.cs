@@ -14,6 +14,12 @@ namespace Microsoft.Extensions.Caching.InMemory
     /// </summary>
     public class InMemoryCacheHandler : DelegatingHandler
     {
+        private static HashSet<HttpMethod> CachedHttpMethods = new HashSet<HttpMethod>
+        {
+            HttpMethod.Get,
+            HttpMethod.Head
+        };
+
         public IStatsProvider StatsProvider { get; }
 
         private readonly IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode;
@@ -23,7 +29,6 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// Cache key provider being used
         /// </summary>
         public ICacheKeysProvider CacheKeysProvider { get; }
-
 
         /// <summary>
         ///     Create a new InMemoryCacheHandler.
@@ -44,13 +49,11 @@ namespace Microsoft.Extensions.Caching.InMemory
             IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode = null,
             IStatsProvider statsProvider = null,
             ICacheKeysProvider cacheKeysProvider = null)
-            : this(
-                  innerHandler,
-                  cacheExpirationPerHttpResponseCode,
-                  statsProvider,
-                  new MemoryCache(new MemoryCacheOptions()),
-                  cacheKeysProvider
-                  )
+            : this(innerHandler,
+                   cacheExpirationPerHttpResponseCode,
+                   statsProvider,
+                   new MemoryCache(new MemoryCacheOptions()),
+                   cacheKeysProvider)
         {
         }
 
@@ -86,14 +89,17 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     Allows to invalidate the cache.
         /// </summary>
         /// <param name="uri">The URI to invalidate.</param>
-        /// <param name="method">An optional method to invalidate. If none is provided, the cache is cleaned for all methods.</param>
-        public void InvalidateCache(Uri uri, HttpMethod method = null)
+        /// <param name="httpMethod">An optional <see cref="HttpMethod"/> to invalidate. If none is provided, the cache is cleaned for all methods.</param>
+        public void InvalidateCache(Uri uri, HttpMethod httpMethod = null)
         {
-            var methods = method != null ? new[] { method } : new[] { HttpMethod.Get, HttpMethod.Head };
-            foreach (var m in methods)
+            var httpMethods = httpMethod != null
+                ? new HashSet<HttpMethod> { httpMethod }
+                : CachedHttpMethods;
+
+            foreach (var method in httpMethods)
             {
-                var request = new HttpRequestMessage(m, uri);
-                var key = this.CacheKeysProvider.GetKey(request);
+                var httpRequestMessage = new HttpRequestMessage(method, uri);
+                var key = this.CacheKeysProvider.GetKey(httpRequestMessage);
                 this.responseCache.Remove(key);
             }
         }
@@ -105,7 +111,8 @@ namespace Microsoft.Extensions.Caching.InMemory
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var key = this.CacheKeysProvider.GetKey(request);
-            // gets the data from cache, and returns the data if it's a cache hit
+
+            // Gets the data from cache, and returns the data if it's a cache hit
             if (request.Method == HttpMethod.Get || request.Method == HttpMethod.Head)
             {
                 var data = await this.responseCache.TryGetAsync(key);
@@ -117,10 +124,10 @@ namespace Microsoft.Extensions.Caching.InMemory
                 }
             }
 
-            // cache misses need to ask the inner handler for an actual response
+            // Cache misses need to ask the inner handler for an actual response
             var response = await base.SendAsync(request, cancellationToken);
 
-            // puts the retrieved response into the cache and returns the cached entry
+            // Puts the retrieved response into the cache and returns the cached entry
             if (request.Method == HttpMethod.Get || request.Method == HttpMethod.Head)
             {
                 var absoluteExpirationRelativeToNow = response.StatusCode.GetAbsoluteExpirationRelativeToNow(this.cacheExpirationPerHttpResponseCode);
@@ -135,7 +142,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 }
             }
 
-            // returns the original response
+            // Returns the original response
             return response;
         }
     }
