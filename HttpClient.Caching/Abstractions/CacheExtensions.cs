@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
                 return true;
             }
 
-            value = default(TItem);
+            value = default;
             return false;
         }
 

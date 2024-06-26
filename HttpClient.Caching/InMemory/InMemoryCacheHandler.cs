@@ -110,16 +110,16 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <returns>The HttpResponseMessage from cache, or a newly invoked one.</returns>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var key = this.CacheKeysProvider.GetKey(request);
+            string key = null;
 
             // Gets the data from cache, and returns the data if it's a cache hit
-            if (request.Method == HttpMethod.Get || request.Method == HttpMethod.Head)
+            var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
+            if (isCachedHttpMethod)
             {
-                var data = await this.responseCache.TryGetAsync(key);
-                if (data != null)
+                key = this.CacheKeysProvider.GetKey(request);
+
+                if (this.TryGetCachedHttpResponseMessage(request, key, out var cachedResponse))
                 {
-                    var cachedResponse = request.PrepareCachedEntry(data);
-                    this.StatsProvider.ReportCacheHit(cachedResponse.StatusCode);
                     return cachedResponse;
                 }
             }
@@ -128,7 +128,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             var response = await base.SendAsync(request, cancellationToken);
 
             // Puts the retrieved response into the cache and returns the cached entry
-            if (request.Method == HttpMethod.Get || request.Method == HttpMethod.Head)
+            if (isCachedHttpMethod)
             {
                 var absoluteExpirationRelativeToNow = response.StatusCode.GetAbsoluteExpirationRelativeToNow(this.cacheExpirationPerHttpResponseCode);
 
@@ -136,7 +136,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
                 if (TimeSpan.Zero != absoluteExpirationRelativeToNow)
                 {
-                    var entry = await response.ToCacheEntry();
+                    var entry = await response.ToCacheEntryAsync();
                     await this.responseCache.TrySetAsync(key, entry, absoluteExpirationRelativeToNow);
                     return request.PrepareCachedEntry(entry);
                 }
@@ -144,6 +144,58 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             // Returns the original response
             return response;
+        }
+
+#if NET5_0_OR_GREATER
+        protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            string key = null;
+
+            // Gets the data from cache, and returns the data if it's a cache hit
+            var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
+            if (isCachedHttpMethod)
+            {
+                key = this.CacheKeysProvider.GetKey(request);
+
+                if (this.TryGetCachedHttpResponseMessage(request, key, out var cachedResponse))
+                {
+                    return cachedResponse;
+                }
+            }
+
+            var response = base.Send(request, cancellationToken);
+
+            // Puts the retrieved response into the cache and returns the cached entry
+            if (isCachedHttpMethod)
+            {
+                var absoluteExpirationRelativeToNow = response.StatusCode.GetAbsoluteExpirationRelativeToNow(this.cacheExpirationPerHttpResponseCode);
+
+                this.StatsProvider.ReportCacheMiss(response.StatusCode);
+
+                if (TimeSpan.Zero != absoluteExpirationRelativeToNow)
+                {
+                    var cacheData = response.ToCacheEntry();
+                    this.responseCache.TrySetCacheData(key, cacheData, absoluteExpirationRelativeToNow);
+                    return request.PrepareCachedEntry(cacheData);
+                }
+            }
+
+            // Returns the original response
+            return response;
+        }
+#endif
+
+        private bool TryGetCachedHttpResponseMessage(HttpRequestMessage request, string key, out HttpResponseMessage cachedResponse)
+        {
+            if (this.responseCache.TryGetCacheData(key, out var cacheData))
+            {
+                cachedResponse = request.PrepareCachedEntry(cacheData);
+                this.StatsProvider.ReportCacheHit(cachedResponse.StatusCode);
+                return true;
+            }
+
+            cachedResponse = default;
+            return false;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -9,14 +10,45 @@ namespace Microsoft.Extensions.Caching.Abstractions
     /// </summary>
     public static class HttpResponseMessageExtensions
     {
-        public static async Task<CacheData> ToCacheEntry(this HttpResponseMessage response)
+        public static async Task<CacheData> ToCacheEntryAsync(this HttpResponseMessage httpResponseMessage)
         {
-            var data = await response.Content.ReadAsByteArrayAsync();
-            var copy = new HttpResponseMessage { ReasonPhrase = response.ReasonPhrase, StatusCode = response.StatusCode, Version = response.Version };
-            var headers = response.Headers.Where(h => h.Value != null && h.Value.Any()).ToDictionary(h => h.Key, h => h.Value);
-            var contentHeaders = response.Content.Headers.Where(h => h.Value != null && h.Value.Any()).ToDictionary(h => h.Key, h => h.Value);
-            var entry = new CacheData(data, copy, headers, contentHeaders);
-            return entry;
+            var contentBytes = await httpResponseMessage.Content.ReadAsByteArrayAsync();
+            return httpResponseMessage.ToCacheEntry(contentBytes);
+        }
+
+#if NET5_0_OR_GREATER
+        public static CacheData ToCacheEntry(this HttpResponseMessage httpResponseMessage)
+        {
+            using var contentStream = httpResponseMessage.Content.ReadAsStream();
+            using (var memoryStream = new MemoryStream())
+            {
+                contentStream.CopyTo(memoryStream);
+                var contentBytes =  memoryStream.ToArray();
+                return httpResponseMessage.ToCacheEntry(contentBytes);
+            }
+        }
+#endif
+
+        public static CacheData ToCacheEntry(this HttpResponseMessage httpResponseMessage, byte[] contentBytes)
+        {
+
+            var httpResponseMessageCopy = new HttpResponseMessage
+            {
+                ReasonPhrase = httpResponseMessage.ReasonPhrase,
+                StatusCode = httpResponseMessage.StatusCode,
+                Version = httpResponseMessage.Version
+            };
+
+            var headers = httpResponseMessage.Headers
+                .Where(h => h.Value != null && h.Value.Any())
+                .ToDictionary(h => h.Key, h => h.Value);
+
+            var contentHeaders = httpResponseMessage.Content.Headers
+                .Where(h => h.Value != null && h.Value.Any())
+                .ToDictionary(h => h.Key, h => h.Value);
+
+            var cacheData = new CacheData(contentBytes, httpResponseMessageCopy, headers, contentHeaders);
+            return cacheData;
         }
 
         /// <summary>

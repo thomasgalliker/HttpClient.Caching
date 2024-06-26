@@ -33,7 +33,12 @@ namespace ConsoleAppSample
                 {
                     Console.Write($"Attempt {i}: HTTP GET {url}...");
                     var stopwatch = Stopwatch.StartNew();
+
+                    // Send the http GET request using GetAsync
                     var httpResponseMessage = await httpClient.GetAsync(url);
+
+                    // Alternatively, use the Send or SendAsync methods to send the http request
+                    //var httpResponseMessage = httpClient.Send(new HttpRequestMessage(HttpMethod.Get, url));
 
                     // Do something useful with the returned content...
                     var httpResponseContent = await httpResponseMessage.Content.ReadAsStringAsync();
