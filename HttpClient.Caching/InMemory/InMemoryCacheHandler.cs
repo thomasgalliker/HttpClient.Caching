@@ -14,6 +14,26 @@ namespace Microsoft.Extensions.Caching.InMemory
     /// </summary>
     public class InMemoryCacheHandler : DelegatingHandler
     {
+#if NET5_0_OR_GREATER
+        /// <summary>
+        ///   The key to use to store the UseCache value in the HttpRequestMessage.Options dictionary.
+        ///   This key is used to determine if the cache should be checked for the request.
+        ///   If the key is not present, the cache will be checked.
+        ///   If the key is present and the value is false, the cache will not be checked.
+        ///   If the key is present and the value is true, the cache will be checked.
+        /// </summary>
+        public readonly static HttpRequestOptionsKey<bool> UseCache = new("UseCache");
+#else
+        /// <summary>
+        ///   The key to use to store the UseCache value in the HttpRequestMessage.Properties dictionary.
+        ///   This key is used to determine if the cache should be checked for the request.
+        ///   If the key is not present, the cache will be checked.
+        ///   If the key is present and the value is false, the cache will not be checked.
+        ///   If the key is present and the value is true, the cache will be checked.
+        /// </summary>
+        public const string UseCache = "UseCache";
+        #endif
+
         private static HashSet<HttpMethod> CachedHttpMethods = new HashSet<HttpMethod>
         {
             HttpMethod.Get,
@@ -105,6 +125,37 @@ namespace Microsoft.Extensions.Caching.InMemory
         }
 
         /// <summary>
+        ///    Determines if the cache should be checked for the request.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>A bool representing if the cache should be cached or not</returns>
+        private bool ShouldTheCacheBeChecked(HttpRequestMessage request)
+        {
+            #if NET5_0_OR_GREATER
+            return request.Options.TryGetValue(UseCache, out bool useCache) == false || useCache == true;
+            #else
+            return request.Properties.TryGetValue(UseCache, out var useCache) == false || (bool)useCache == true;
+            #endif
+        }
+
+        /// <summary>
+        ///    Determines if the response should be cached.
+        /// </summary>
+        /// <param name="response"></param>
+        /// <returns>A bool representing if the response should be cached or not</returns>
+        private bool ShouldCacheResponse(HttpResponseMessage response)
+        {
+            if (response.Headers.CacheControl is not null)
+            {
+                return response.Headers.CacheControl.NoStore == false
+                    && response.Headers.CacheControl.NoCache == false
+                    && response.StatusCode != HttpStatusCode.NotModified;
+            }
+
+            return response.StatusCode != HttpStatusCode.NotModified;
+        }
+
+        /// <summary>
         ///     Tries to get the value from the cache, and only calls the delegating handler on cache misses.
         /// </summary>
         /// <returns>The HttpResponseMessage from cache, or a newly invoked one.</returns>
@@ -114,7 +165,9 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             // Gets the data from cache, and returns the data if it's a cache hit
             var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
-            if (isCachedHttpMethod)
+            // Check if the cache should be checked
+            var shouldCheckCache = this.ShouldTheCacheBeChecked(request);
+            if (shouldCheckCache && isCachedHttpMethod)
             {
                 key = this.CacheKeysProvider.GetKey(request);
 
@@ -134,7 +187,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
                 this.StatsProvider.ReportCacheMiss(response.StatusCode);
 
-                if (TimeSpan.Zero != absoluteExpirationRelativeToNow)
+                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != absoluteExpirationRelativeToNow)
                 {
                     var entry = await response.ToCacheEntryAsync();
                     await this.responseCache.TrySetAsync(key, entry, absoluteExpirationRelativeToNow);
@@ -153,7 +206,9 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             // Gets the data from cache, and returns the data if it's a cache hit
             var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
-            if (isCachedHttpMethod)
+            // Check if the cache should be checked
+            var shouldCheckCache = this.ShouldTheCacheBeChecked(request);
+            if (shouldCheckCache && isCachedHttpMethod)
             {
                 key = this.CacheKeysProvider.GetKey(request);
 
@@ -172,7 +227,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
                 this.StatsProvider.ReportCacheMiss(response.StatusCode);
 
-                if (TimeSpan.Zero != absoluteExpirationRelativeToNow)
+                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != absoluteExpirationRelativeToNow)
                 {
                     var cacheData = response.ToCacheEntry();
                     this.responseCache.TrySetCacheData(key, cacheData, absoluteExpirationRelativeToNow);
