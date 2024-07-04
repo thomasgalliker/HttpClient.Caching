@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///   If the key is present and the value is false, the cache will not be checked.
         ///   If the key is present and the value is true, the cache will be checked.
         /// </summary>
-        public readonly static HttpRequestOptionsKey<bool> UseCache = new("UseCache");
+        public readonly static HttpRequestOptionsKey<bool> UseCache = new(nameof(UseCache));
 #else
         /// <summary>
         ///   The key to use to store the UseCache value in the HttpRequestMessage.Properties dictionary.
@@ -31,7 +31,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///   If the key is present and the value is false, the cache will not be checked.
         ///   If the key is present and the value is true, the cache will be checked.
         /// </summary>
-        public const string UseCache = "UseCache";
+        public const string UseCache = nameof(UseCache);
         #endif
 
         private static HashSet<HttpMethod> CachedHttpMethods = new HashSet<HttpMethod>
