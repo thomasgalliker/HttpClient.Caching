@@ -21,7 +21,12 @@ namespace HttpClient.Caching.Tests.Testdata
 
         public int NumberOfCalls { get; set; }
 
-        public TestMessageHandler(HttpStatusCode responseStatusCode = DefaultResponseStatusCode, string content = DefaultContent, string contentType = DefaultContentType, Encoding encoding = null, TimeSpan delay = default(TimeSpan))
+        public TestMessageHandler(
+            HttpStatusCode responseStatusCode = DefaultResponseStatusCode,
+            string content = DefaultContent,
+            string contentType = DefaultContentType,
+            Encoding encoding = null,
+            TimeSpan delay = default)
         {
             this.responseStatusCode = responseStatusCode;
             this.content = content;
@@ -30,18 +35,39 @@ namespace HttpClient.Caching.Tests.Testdata
             this.encoding = encoding ?? Encoding.UTF8;
         }
 
+        private HttpResponseMessage CreateHttpResponseMessage()
+        {
+            return new HttpResponseMessage
+            {
+                Content = new StringContent(this.content, this.encoding, this.contentType),
+                StatusCode = this.responseStatusCode
+            };
+        }
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             this.NumberOfCalls++;
 
-            // optional delay
-            if (this.delay != default(TimeSpan))
+            if (this.delay != default)
             {
                 await Task.Delay(this.delay, cancellationToken);
             }
 
-            // simulate actual result
-            return new HttpResponseMessage { Content = new StringContent(this.content, this.encoding, this.contentType), StatusCode = this.responseStatusCode };
+            return this.CreateHttpResponseMessage();
         }
+
+#if NET5_0_OR_GREATER
+        protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            this.NumberOfCalls++;
+
+            if (this.delay != default)
+            {
+                Thread.Sleep(this.delay);
+            }
+
+            return this.CreateHttpResponseMessage();
+        }
+#endif
     }
 }

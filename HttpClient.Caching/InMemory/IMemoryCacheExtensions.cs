@@ -15,6 +15,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="cache">The in memory cache.</param>
         /// <param name="key">The key to retrieve from the cache.</param>
         /// <returns>The data of the cache entry, or null if not found or on any error.</returns>
+        [Obsolete("Use TryGetCacheData")]
         public static Task<CacheData> TryGetAsync(this IMemoryCache cache, string key)
         {
             try
@@ -31,6 +32,27 @@ namespace Microsoft.Extensions.Caching.InMemory
                 // ignore all exceptions; return null
                 return Task.FromResult(default(CacheData));
             }
+        }
+
+        public static bool TryGetCacheData(this IMemoryCache cache, string key, out CacheData cacheData)
+        {
+            var result = false;
+            cacheData = default;
+
+            try
+            {
+                if (cache.TryGetValue(key, out byte[] binaryData))
+                {
+                    cacheData = binaryData.Deserialize();
+                    result = true;
+                }
+            }
+            catch
+            {
+                // Ignore exception
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -53,6 +75,24 @@ namespace Microsoft.Extensions.Caching.InMemory
                 // ignore all exceptions
                 return Task.FromResult(false);
             }
+        }
+
+        public static bool TrySetCacheData(this IMemoryCache cache, string key, CacheData value, TimeSpan absoluteExpirationRelativeToNow)
+        {
+            var result = false;
+
+            try
+            {
+                cache.Set(key, value.Serialize(), absoluteExpirationRelativeToNow);
+                result = true;
+            }
+            catch
+            {
+                // Ignore exceptions
+                result = false;
+            }
+
+            return result;
         }
     }
 }
