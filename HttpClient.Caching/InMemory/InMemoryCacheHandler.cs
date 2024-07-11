@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///   If the key is present and the value is true, the cache will be checked.
         /// </summary>
         public const string UseCache = nameof(UseCache);
-        #endif
+#endif
 
         private static HashSet<HttpMethod> CachedHttpMethods = new HashSet<HttpMethod>
         {
@@ -131,11 +131,14 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <returns>A bool representing if the cache should be cached or not</returns>
         private bool ShouldTheCacheBeChecked(HttpRequestMessage request)
         {
-            #if NET5_0_OR_GREATER
-            return request.Options.TryGetValue(UseCache, out bool useCache) == false || useCache == true;
-            #else
-            return request.Properties.TryGetValue(UseCache, out var useCache) == false || (bool)useCache == true;
-            #endif
+            bool useCacheOption;
+#if NET5_0_OR_GREATER
+            useCacheOption = request.Options.TryGetValue(UseCache, out bool useCache) == false || useCache == true;
+#else
+            useCacheOption = request.Properties.TryGetValue(UseCache, out var useCache) == false || (bool)useCache == true;
+#endif
+
+            return useCacheOption && request.Headers.CacheControl?.NoCache != true;
         }
 
         /// <summary>
@@ -184,13 +187,17 @@ namespace Microsoft.Extensions.Caching.InMemory
             if (isCachedHttpMethod)
             {
                 var absoluteExpirationRelativeToNow = response.StatusCode.GetAbsoluteExpirationRelativeToNow(this.cacheExpirationPerHttpResponseCode);
+                var maxAgeHeader = response.Headers.CacheControl?.MaxAge ?? TimeSpan.MaxValue;
+
+                // If the server sends a Cache-Control header with a max-age that is less than the configured expiration time, use the max-age value
+                var maxCacheTime = (maxAgeHeader < absoluteExpirationRelativeToNow) ? maxAgeHeader : absoluteExpirationRelativeToNow;
 
                 this.StatsProvider.ReportCacheMiss(response.StatusCode);
 
-                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != absoluteExpirationRelativeToNow)
+                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
                 {
                     var entry = await response.ToCacheEntryAsync();
-                    await this.responseCache.TrySetAsync(key, entry, absoluteExpirationRelativeToNow);
+                    await this.responseCache.TrySetAsync(key, entry, maxCacheTime);
                     return request.PrepareCachedEntry(entry);
                 }
             }
@@ -224,13 +231,17 @@ namespace Microsoft.Extensions.Caching.InMemory
             if (isCachedHttpMethod)
             {
                 var absoluteExpirationRelativeToNow = response.StatusCode.GetAbsoluteExpirationRelativeToNow(this.cacheExpirationPerHttpResponseCode);
+                var maxAgeHeader = response.Headers.CacheControl?.MaxAge ?? TimeSpan.MaxValue;
+
+                // If the server sends a Cache-Control header with a max-age that is less than the configured expiration time, use the max-age value
+                var maxCacheTime = (maxAgeHeader < absoluteExpirationRelativeToNow) ? maxAgeHeader : absoluteExpirationRelativeToNow;
 
                 this.StatsProvider.ReportCacheMiss(response.StatusCode);
 
-                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != absoluteExpirationRelativeToNow)
+                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
                 {
                     var cacheData = response.ToCacheEntry();
-                    this.responseCache.TrySetCacheData(key, cacheData, absoluteExpirationRelativeToNow);
+                    this.responseCache.TrySetCacheData(key, cacheData, maxCacheTime);
                     return request.PrepareCachedEntry(cacheData);
                 }
             }
