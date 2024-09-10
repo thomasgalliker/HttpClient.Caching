@@ -28,6 +28,24 @@ namespace HttpClient.Caching.Tests.InMemory
             testMessageHandler.NumberOfCalls.Should().Be(1);
         }
 
+#if NET5_0_OR_GREATER
+        [Fact]
+        public void CachesTheResult_Send()
+        {
+            // setup
+            var testMessageHandler = new TestMessageHandler();
+            var client = new System.Net.Http.HttpClient(new InMemoryCacheHandler(testMessageHandler));
+
+            // execute twice
+            var response1 = client.Send(new HttpRequestMessage(HttpMethod.Get, "http://unittest"));
+            var response2 = client.Send(new HttpRequestMessage(HttpMethod.Get, "http://unittest"));
+
+            // validate
+            testMessageHandler.NumberOfCalls.Should().Be(1);
+            response1.Content.Should().BeEquivalentTo(response2.Content);
+        }
+#endif
+
         #region Tests with cache key provider MethodUriHeadersCacheKeysProvider
 
         /// <summary>

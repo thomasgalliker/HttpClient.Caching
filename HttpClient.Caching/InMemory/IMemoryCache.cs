@@ -8,6 +8,8 @@ namespace Microsoft.Extensions.Caching.InMemory
     /// </summary>
     public interface IMemoryCache : IDisposable
     {
+        int Count { get; }
+
         /// <summary>Gets the item associated with this key if present.</summary>
         /// <param name="key">An object identifying the requested entry.</param>
         /// <param name="value">The located value or null.</param>
@@ -22,6 +24,8 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <summary>Removes the object associated with the given key.</summary>
         /// <param name="key">An object identifying the entry.</param>
         void Remove(object key);
+
+        void Compact(double percentage);
 
         void Clear();
     }

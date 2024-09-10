@@ -59,7 +59,7 @@ HttpClient allows to inject a custom http handler. In the follwing example, we i
 ```C#
 static void Main(string[] args)
 {
-    const string url = "http://worldclockapi.com/api/json/utc/now";
+    const string url = "http://worldtimeapi.org/api/timezone/Europe/Zurich";
 
     var httpClientHandler = new HttpClientHandler();
     var cacheExpirationPerHttpResponseCode = CacheExpirationProvider.CreateSimple(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));
@@ -96,11 +96,11 @@ static void Main(string[] args)
 
 Console output:
 ```
-Attempt 1: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 625ms
-Attempt 2: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 48ms
-Attempt 3: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 1ms
-Attempt 4: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 1ms
-Attempt 5: HTTP GET http://worldclockapi.com/api/json/utc/now... completed in 1ms
+Attempt 1: HTTP GET http://worldtimeapi.org/api/timezone/Europe/Zurich... completed in 625ms
+Attempt 2: HTTP GET http://worldtimeapi.org/api/timezone/Europe/Zurich... completed in 48ms
+Attempt 3: HTTP GET http://worldtimeapi.org/api/timezone/Europe/Zurich... completed in 1ms
+Attempt 4: HTTP GET http://worldtimeapi.org/api/timezone/Europe/Zurich... completed in 1ms
+Attempt 5: HTTP GET http://worldtimeapi.org/api/timezone/Europe/Zurich... completed in 1ms
 
 TotalRequests: 5
 -> CacheHit: 4
@@ -118,7 +118,7 @@ with InMemoryCacheHandler.
 ```C#
 static void Main(string[] args)
 {
-    const string url = "http://worldclockapi.com/api/json/utc/now";
+    const string url = "http://worldtimeapi.org/api/timezone/Europe/Zurich";
 
     var httpClientHandler = new HttpClientHandler();
     var cacheExpirationPerHttpResponseCode = CacheExpirationProvider.CreateSimple(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));

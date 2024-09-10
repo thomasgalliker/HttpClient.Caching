@@ -69,7 +69,6 @@ namespace Microsoft.Extensions.Caching.InMemory
             // start 3 tasks
             var httpSendTask = base.SendAsync(request, cancellationToken);
             var timeoutTask = Task.Delay(this.maxTimeout, cancellationToken);
-            var cacheTask = this.responseCache.TryGetAsync(key);
 
             // ensure the send task completes (or the timeout task, whatever comes first).
             var firstCompletedTask = await Task.WhenAny(httpSendTask, timeoutTask);
@@ -77,7 +76,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             // timeout occurred
             if (firstCompletedTask == timeoutTask)
             {
-                var data = await this.ExtractCachedResponse(request, cacheTask);
+                var data = this.ExtractCachedResponse(request, key);
                 if (data != null)
                 {
                     // update the cache after the http task eventually completes, without awaiting it
@@ -101,7 +100,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             }
 
             // when unsuccessful, try to get it from the cache, which was the last successful invocation
-            var cachedResponse = await this.ExtractCachedResponse(request, cacheTask);
+            var cachedResponse = this.ExtractCachedResponse(request, key);
             if (cachedResponse != null)
             {
                 return cachedResponse;
@@ -112,13 +111,10 @@ namespace Microsoft.Extensions.Caching.InMemory
             return response;
         }
 
-        private async Task<HttpResponseMessage> ExtractCachedResponse(HttpRequestMessage request, Task<CacheData> cacheTask)
+        private HttpResponseMessage ExtractCachedResponse(HttpRequestMessage request, string key)
         {
-            // get from cache
-            var data = await cacheTask;
-
             // it's in the cache, return that result
-            if (data != null)
+            if (this.responseCache.TryGetCacheData(key, out var data))
             {
                 // get the data from the cache
                 var cachedResponse = request.PrepareCachedEntry(data);
@@ -133,7 +129,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             if ((int)response.StatusCode < 500 && TimeSpan.Zero != this.cacheDuration)
             {
-                var entry = await response.ToCacheEntry();
+                var entry = await response.ToCacheEntryAsync();
                 await this.responseCache.TrySetAsync(key, entry, this.cacheDuration);
                 return entry;
             }
