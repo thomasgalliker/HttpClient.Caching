@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///   If the key is present and the value is false, the cache will not be checked.
         ///   If the key is present and the value is true, the cache will be checked.
         /// </summary>
-        public readonly static HttpRequestOptionsKey<bool> UseCache = new(nameof(UseCache));
+        public static readonly HttpRequestOptionsKey<bool> UseCache = new HttpRequestOptionsKey<bool>(nameof(UseCache));
 #else
         /// <summary>
         ///   The key to use to store the UseCache value in the HttpRequestMessage.Properties dictionary.
@@ -34,7 +34,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         public const string UseCache = nameof(UseCache);
 #endif
 
-        private static HashSet<HttpMethod> CachedHttpMethods = new HashSet<HttpMethod>
+        private static readonly HashSet<HttpMethod> CachedHttpMethods = new HashSet<HttpMethod>
         {
             HttpMethod.Get,
             HttpMethod.Head
@@ -129,13 +129,12 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// </summary>
         /// <param name="request"></param>
         /// <returns>A bool representing if the cache should be cached or not</returns>
-        private bool ShouldTheCacheBeChecked(HttpRequestMessage request)
+        private static bool ShouldTheCacheBeChecked(HttpRequestMessage request)
         {
-            bool useCacheOption;
 #if NET5_0_OR_GREATER
-            useCacheOption = request.Options.TryGetValue(UseCache, out bool useCache) == false || useCache == true;
+            var useCacheOption = request.Options.TryGetValue(UseCache, out var useCache) == false || useCache == true;
 #else
-            useCacheOption = request.Properties.TryGetValue(UseCache, out var useCache) == false || (bool)useCache == true;
+            var useCacheOption = request.Properties.TryGetValue(UseCache, out var useCache) == false || (bool)useCache == true;
 #endif
 
             return useCacheOption && request.Headers.CacheControl?.NoCache != true;
@@ -146,7 +145,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// </summary>
         /// <param name="response"></param>
         /// <returns>A bool representing if the response should be cached or not</returns>
-        private bool ShouldCacheResponse(HttpResponseMessage response)
+        private static bool ShouldCacheResponse(HttpResponseMessage response)
         {
             if (response.Headers.CacheControl is not null)
             {
@@ -169,7 +168,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             // Gets the data from cache, and returns the data if it's a cache hit
             var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
             // Check if the cache should be checked
-            var shouldCheckCache = this.ShouldTheCacheBeChecked(request);
+            var shouldCheckCache = ShouldTheCacheBeChecked(request);
             if (shouldCheckCache && isCachedHttpMethod)
             {
                 key = this.CacheKeysProvider.GetKey(request);
@@ -194,7 +193,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
                 this.StatsProvider.ReportCacheMiss(response.StatusCode);
 
-                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
+                if (ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
                 {
                     var entry = await response.ToCacheEntryAsync();
                     await this.responseCache.TrySetAsync(key, entry, maxCacheTime);
@@ -213,8 +212,9 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             // Gets the data from cache, and returns the data if it's a cache hit
             var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
+
             // Check if the cache should be checked
-            var shouldCheckCache = this.ShouldTheCacheBeChecked(request);
+            var shouldCheckCache = ShouldTheCacheBeChecked(request);
             if (shouldCheckCache && isCachedHttpMethod)
             {
                 key = this.CacheKeysProvider.GetKey(request);
@@ -238,7 +238,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
                 this.StatsProvider.ReportCacheMiss(response.StatusCode);
 
-                if (this.ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
+                if (ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
                 {
                     var cacheData = response.ToCacheEntry();
                     this.responseCache.TrySetCacheData(key, cacheData, maxCacheTime);
