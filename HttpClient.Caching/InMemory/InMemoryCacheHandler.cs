@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Abstractions;
@@ -70,10 +71,10 @@ namespace Microsoft.Extensions.Caching.InMemory
             IStatsProvider statsProvider = null,
             ICacheKeysProvider cacheKeysProvider = null)
             : this(innerHandler,
-                   cacheExpirationPerHttpResponseCode,
-                   statsProvider,
-                   new MemoryCache(new MemoryCacheOptions()),
-                   cacheKeysProvider)
+                cacheExpirationPerHttpResponseCode,
+                statsProvider,
+                new MemoryCache(new MemoryCacheOptions()),
+                cacheKeysProvider)
         {
         }
 
@@ -147,11 +148,12 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <returns>A bool representing if the response should be cached or not</returns>
         private static bool ShouldCacheResponse(HttpResponseMessage response)
         {
-            if (response.Headers.CacheControl is not null)
+            if (response.Headers.CacheControl is CacheControlHeaderValue cacheControl)
             {
-                return response.Headers.CacheControl.NoStore == false
-                    && response.Headers.CacheControl.NoCache == false
-                    && response.StatusCode != HttpStatusCode.NotModified;
+                return
+                    cacheControl.NoStore == false &&
+                    cacheControl.NoCache == false &&
+                    response.StatusCode != HttpStatusCode.NotModified;
             }
 
             return response.StatusCode != HttpStatusCode.NotModified;
@@ -167,6 +169,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             // Gets the data from cache, and returns the data if it's a cache hit
             var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
+
             // Check if the cache should be checked
             var shouldCheckCache = ShouldTheCacheBeChecked(request);
             if (shouldCheckCache && isCachedHttpMethod)
