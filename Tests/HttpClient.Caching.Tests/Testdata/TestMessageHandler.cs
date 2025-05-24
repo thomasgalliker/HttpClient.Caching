@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace HttpClient.Caching.Tests.Testdata
         private readonly string content;
         private readonly string contentType;
         private readonly TimeSpan delay;
+        private readonly CacheControlHeaderValue cacheControl;
         private readonly Encoding encoding;
 
         public int NumberOfCalls { get; set; }
@@ -26,22 +28,31 @@ namespace HttpClient.Caching.Tests.Testdata
             string content = DefaultContent,
             string contentType = DefaultContentType,
             Encoding encoding = null,
-            TimeSpan delay = default)
+            TimeSpan delay = default,
+            CacheControlHeaderValue cacheControl = null)
         {
             this.responseStatusCode = responseStatusCode;
             this.content = content;
             this.contentType = contentType;
             this.delay = delay;
+            this.cacheControl = cacheControl;
             this.encoding = encoding ?? Encoding.UTF8;
         }
 
         private HttpResponseMessage CreateHttpResponseMessage()
         {
-            return new HttpResponseMessage
+            var httpResponseMessage = new HttpResponseMessage
             {
                 Content = new StringContent(this.content, this.encoding, this.contentType),
-                StatusCode = this.responseStatusCode
+                StatusCode = this.responseStatusCode,
             };
+
+            if (this.cacheControl != null)
+            {
+                httpResponseMessage.Headers.CacheControl = this.cacheControl;
+            }
+
+            return httpResponseMessage;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

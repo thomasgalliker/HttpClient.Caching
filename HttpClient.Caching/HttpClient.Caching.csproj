@@ -8,9 +8,12 @@
 		<Authors>Thomas Galliker</Authors>
 		<TargetFrameworks>net48;netstandard1.2;netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
 		<AssemblyName>HttpClient.Caching</AssemblyName>
+    <RootNamespace>Microsoft.Extensions.Caching</RootNamespace>
 		<PackageId>HttpClient.Caching</PackageId>
 		<PackageTags>httpclient.caching;httpclient;caching;cache;inmemory</PackageTags>
-		<PackageIconUrl>https://raw.githubusercontent.com/thomasgalliker/HttpClient.Caching/develop/logo.png</PackageIconUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageProjectUrl>https://github.com/thomasgalliker/HttpClient.Caching</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/thomasgalliker/HttpClient.Caching</RepositoryUrl>
@@ -24,29 +27,27 @@
 		<Company>superdev GmbH</Company>
 		<Product>HttpClient.Caching</Product>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-		<RootNamespace>Microsoft.Extensions.Caching</RootNamespace>
-		<PackageReleaseNotes>1.3.x
+    <Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
+		<PackageReleaseNotes>
+1.3
 - Add ICacheKeysProvider which allows to specify custom cache keys
 
-1.0.0
+1.0
 - Initial release
 		</PackageReleaseNotes>
-		<Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
-
+  
+  <ItemGroup>
+    <None Include="..\Images\logo.png" Pack="True" PackagePath="\" />
+    <None Include="..\README.md" Pack="True" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="True" PackagePath="\" />
+  </ItemGroup>
+  
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="[11.0.2,)" />
+		<PackageReference Include="Newtonsoft.Json" Version="[13.0.1,)" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
 		<Reference Include="System.Net.Http" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="..\README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
 	</ItemGroup>
 </Project>
