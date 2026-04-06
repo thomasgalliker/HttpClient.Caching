@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Abstractions;
 
 namespace Microsoft.Extensions.Caching.InMemory
@@ -15,7 +12,7 @@ namespace Microsoft.Extensions.Caching.InMemory
     /// </summary>
     public class InMemoryCacheHandler : DelegatingHandler
     {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
         /// <summary>
         ///   The key to use to store the UseCache value in the HttpRequestMessage.Options dictionary.
         ///   This key is used to determine if the cache should be checked for the request.
@@ -66,10 +63,10 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="cacheKeysProvider">
         ///     An <see cref="ICacheKeysProvider"/> that provides keys to retrieve and store items in the cache
         /// </param>
-        public InMemoryCacheHandler(HttpMessageHandler innerHandler = null,
-            IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode = null,
-            IStatsProvider statsProvider = null,
-            ICacheKeysProvider cacheKeysProvider = null)
+        public InMemoryCacheHandler(HttpMessageHandler? innerHandler = null,
+            IDictionary<HttpStatusCode, TimeSpan>? cacheExpirationPerHttpResponseCode = null,
+            IStatsProvider? statsProvider = null,
+            ICacheKeysProvider? cacheKeysProvider = null)
             : this(innerHandler,
                 cacheExpirationPerHttpResponseCode,
                 statsProvider,
@@ -93,11 +90,11 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="cache">The cache to be used.</param>
         /// <param name="cacheKeysProvider">The <see cref="ICacheKeysProvider"/> cache keys provider to use</param>
         internal InMemoryCacheHandler(
-            HttpMessageHandler innerHandler,
-            IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode,
-            IStatsProvider statsProvider,
-            IMemoryCache cache,
-            ICacheKeysProvider cacheKeysProvider)
+            HttpMessageHandler? innerHandler,
+            IDictionary<HttpStatusCode, TimeSpan>? cacheExpirationPerHttpResponseCode,
+            IStatsProvider? statsProvider,
+            IMemoryCache? cache,
+            ICacheKeysProvider? cacheKeysProvider)
             : base(innerHandler ?? new HttpClientHandler())
         {
             this.StatsProvider = statsProvider ?? new StatsProvider(nameof(InMemoryCacheHandler));
@@ -111,7 +108,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// </summary>
         /// <param name="uri">The URI to invalidate.</param>
         /// <param name="httpMethod">An optional <see cref="HttpMethod"/> to invalidate. If none is provided, the cache is cleaned for all methods.</param>
-        public void InvalidateCache(Uri uri, HttpMethod httpMethod = null)
+        public void InvalidateCache(Uri uri, HttpMethod? httpMethod = null)
         {
             var httpMethods = httpMethod != null
                 ? new HashSet<HttpMethod> { httpMethod }
@@ -132,7 +129,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <returns>A bool representing if the cache should be cached or not</returns>
         private static bool ShouldTheCacheBeChecked(HttpRequestMessage request)
         {
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var useCacheOption = request.Options.TryGetValue(UseCache, out var useCache) == false || useCache == true;
 #else
             var useCacheOption = request.Properties.TryGetValue(UseCache, out var useCache) == false || (bool)useCache == true;
@@ -165,7 +162,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <returns>The HttpResponseMessage from cache, or a newly invoked one.</returns>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            string key = null;
+            string? key = null;
 
             // Gets the data from cache, and returns the data if it's a cache hit
             var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
@@ -199,7 +196,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 if (ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
                 {
                     var entry = await response.ToCacheEntryAsync();
-                    await this.responseCache.TrySetAsync(key, entry, maxCacheTime);
+                    await this.responseCache.TrySetAsync(key!, entry, maxCacheTime);
                     return request.PrepareCachedEntry(entry);
                 }
             }
@@ -208,10 +205,10 @@ namespace Microsoft.Extensions.Caching.InMemory
             return response;
         }
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
         protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            string key = null;
+            string? key = null;
 
             // Gets the data from cache, and returns the data if it's a cache hit
             var isCachedHttpMethod = CachedHttpMethods.Contains(request.Method);
@@ -244,7 +241,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 if (ShouldCacheResponse(response) && TimeSpan.Zero != maxCacheTime)
                 {
                     var cacheData = response.ToCacheEntry();
-                    this.responseCache.TrySetCacheData(key, cacheData, maxCacheTime);
+                    this.responseCache.TrySetCacheData(key!, cacheData, maxCacheTime);
                     return request.PrepareCachedEntry(cacheData);
                 }
             }
@@ -254,7 +251,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         }
 #endif
 
-        private bool TryGetCachedHttpResponseMessage(HttpRequestMessage request, string key, out HttpResponseMessage cachedResponse)
+        private bool TryGetCachedHttpResponseMessage(HttpRequestMessage request, string key, [NotNullWhen(true)] out HttpResponseMessage? cachedResponse)
         {
             if (this.responseCache.TryGetCacheData(key, out var cacheData))
             {
@@ -263,7 +260,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 return true;
             }
 
-            cachedResponse = default;
+            cachedResponse = null;
             return false;
         }
     }

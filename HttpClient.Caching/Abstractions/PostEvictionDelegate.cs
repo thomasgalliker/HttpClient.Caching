@@ -7,5 +7,5 @@
     /// <param name="value"></param>
     /// <param name="reason">The <see cref="T:Microsoft.Extensions.Caching.Abstractions.EvictionReason" />.</param>
     /// <param name="state">The information that was passed when registering the callback.</param>
-    public delegate void PostEvictionDelegate(object key, object value, EvictionReason reason, object state);
+    public delegate void PostEvictionDelegate(object key, object value, EvictionReason evictionReason, object? state);
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Caching.Abstractions;
 
 namespace Microsoft.Extensions.Caching.InMemory
@@ -14,7 +15,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="key">An object identifying the requested entry.</param>
         /// <param name="value">The located value or null.</param>
         /// <returns>True if the key was found.</returns>
-        bool TryGetValue(object key, out object value);
+        bool TryGetValue(object key, [NotNullWhen(true)] out object? value);
 
         /// <summary>Create or overwrite an entry in the cache.</summary>
         /// <param name="key">An object identifying the entry.</param>

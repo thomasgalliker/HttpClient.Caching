@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.Extensions.Caching.Abstractions;
 
 namespace Microsoft.Extensions.Caching.InMemory
@@ -14,10 +10,10 @@ namespace Microsoft.Extensions.Caching.InMemory
         private bool added;
         private readonly Action<CacheEntry> notifyCacheOfExpiration;
         private readonly Action<CacheEntry> notifyCacheEntryDisposed;
-        private IList<IDisposable> expirationTokenRegistrations;
-        private IList<PostEvictionCallbackRegistration> postEvictionCallbacks;
+        private IList<IDisposable>? expirationTokenRegistrations;
+        private IList<PostEvictionCallbackRegistration>? postEvictionCallbacks;
         private bool isExpired;
-        internal IList<IChangeToken> expirationTokens;
+        internal IList<IChangeToken>? expirationTokens;
         internal DateTimeOffset? absoluteExpiration;
         internal TimeSpan? absoluteExpirationRelativeToNow;
         private TimeSpan? slidingExpiration;
@@ -98,7 +94,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             if (key == null)
             {
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             }
 
             if (notifyCacheEntryDisposed == null)
@@ -140,11 +136,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
         internal void SetExpired(EvictionReason reason)
         {
-            if (this.EvictionReason == null)
-            {
-                this.EvictionReason = reason;
-            }
-
+            this.EvictionReason = reason;
             this.isExpired = true;
             this.DetachTokens();
         }
@@ -267,14 +259,11 @@ namespace Microsoft.Extensions.Caching.InMemory
                 try
                 {
                     var evictionCallback = callbackRegistration.EvictionCallback;
-                    if (evictionCallback != null)
-                    {
-                        var key = entry.Key;
-                        var obj = entry.Value;
-                        var evictionReason = entry.EvictionReason;
-                        var state = callbackRegistration.State;
-                        evictionCallback.Invoke(key, obj, evictionReason, state);
-                    }
+                    var key = entry.Key;
+                    var obj = entry.Value;
+                    var evictionReason = entry.EvictionReason;
+                    var state = callbackRegistration.State;
+                    evictionCallback.Invoke(key, obj, evictionReason, state);
                 }
                 catch (Exception ex)
                 {
@@ -283,7 +272,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             }
         }
 
-        internal void PropagateOptions(CacheEntry parent)
+        internal void PropagateOptions(CacheEntry? parent)
         {
             if (parent == null)
             {

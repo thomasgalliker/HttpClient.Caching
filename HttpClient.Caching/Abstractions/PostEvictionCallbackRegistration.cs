@@ -2,8 +2,8 @@
 {
     public class PostEvictionCallbackRegistration
     {
-        public PostEvictionDelegate EvictionCallback { get; set; }
+        public PostEvictionDelegate EvictionCallback { get; set; } = null!;
 
-        public object State { get; set; }
+        public object? State { get; set; }
     }
 }

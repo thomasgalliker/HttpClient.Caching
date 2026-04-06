@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Caching.Abstractions;
 using Microsoft.Extensions.Caching.InMemory.Internal;
 
@@ -125,7 +121,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             this.StartScanForExpiredItems();
         }
 
-        public bool TryGetValue(object key, out object result)
+        public bool TryGetValue(object key, [NotNullWhen(true)] out object? result)
         {
             if (key == null)
             {
@@ -216,7 +212,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             var factory = Task.Factory;
             var none = CancellationToken.None;
             var scheduler = TaskScheduler.Default;
-            factory.StartNew(state => ScanForExpiredItems((MemoryCache)state), this, none, TaskCreationOptions.DenyChildAttach, scheduler);
+            factory.StartNew(state => ScanForExpiredItems((MemoryCache)state!), this, none, TaskCreationOptions.DenyChildAttach, scheduler);
         }
 
         private static void ScanForExpiredItems(MemoryCache cache)

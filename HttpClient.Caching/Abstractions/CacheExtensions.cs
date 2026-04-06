@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.InMemory;
 
@@ -6,19 +7,19 @@ namespace Microsoft.Extensions.Caching.Abstractions
 {
     public static class CacheExtensions
     {
-        public static object Get(this IMemoryCache cache, object key)
+        public static object? Get(this IMemoryCache cache, object key)
         {
             cache.TryGetValue(key, out var obj);
             return obj;
         }
 
-        public static TItem Get<TItem>(this IMemoryCache cache, object key)
+        public static TItem? Get<TItem>(this IMemoryCache cache, object key)
         {
-            cache.TryGetValue(key, out TItem obj);
+            cache.TryGetValue(key, out TItem? obj);
             return obj;
         }
 
-        public static bool TryGetValue<TItem>(this IMemoryCache cache, object key, out TItem value)
+        public static bool TryGetValue<TItem>(this IMemoryCache cache, object key, [NotNullWhen(true)] out TItem? value)
         {
             if (cache.TryGetValue(key, out var obj))
             {
@@ -30,7 +31,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
             return false;
         }
 
-        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value)
+        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value) where TItem : notnull
         {
             var entry = cache.CreateEntry(key);
             entry.Value = value;
@@ -38,7 +39,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
             return value;
         }
 
-        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, DateTimeOffset absoluteExpiration)
+        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, DateTimeOffset absoluteExpiration) where TItem : notnull
         {
             var entry = cache.CreateEntry(key);
             DateTimeOffset? nullable = absoluteExpiration;
@@ -48,7 +49,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
             return value;
         }
 
-        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, TimeSpan absoluteExpirationRelativeToNow)
+        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, TimeSpan absoluteExpirationRelativeToNow) where TItem : notnull
         {
             var entry = cache.CreateEntry(key);
             TimeSpan? nullable = absoluteExpirationRelativeToNow;
@@ -58,7 +59,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
             return value;
         }
 
-        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, IChangeToken expirationToken)
+        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, IChangeToken expirationToken) where TItem : notnull
         {
             var entry = cache.CreateEntry(key);
             var expirationToken1 = expirationToken;
@@ -68,22 +69,23 @@ namespace Microsoft.Extensions.Caching.Abstractions
             return value;
         }
 
-        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, MemoryCacheEntryOptions options)
+        public static TItem Set<TItem>(this IMemoryCache cache, object key, TItem value, MemoryCacheEntryOptions options) where TItem : notnull
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             using (var entry = cache.CreateEntry(key))
             {
-                if (options != null)
-                {
-                    entry.SetOptions(options);
-                }
-
+                entry.SetOptions(options);
                 entry.Value = value;
             }
 
             return value;
         }
 
-        public static TItem GetOrCreate<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, TItem> factory)
+        public static TItem GetOrCreate<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, TItem> factory) where TItem : notnull
         {
             if (!cache.TryGetValue(key, out var obj))
             {
@@ -96,7 +98,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
             return (TItem)obj;
         }
 
-        public static async Task<TItem> GetOrCreateAsync<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, Task<TItem>> factory)
+        public static async Task<TItem> GetOrCreateAsync<TItem>(this IMemoryCache cache, object key, Func<ICacheEntry, Task<TItem>> factory) where TItem : notnull
         {
             if (!cache.TryGetValue(key, out var obj))
             {

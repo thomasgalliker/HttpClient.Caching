@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         {
             if (callback == null)
             {
-                throw new ArgumentNullException("callback");
+                throw new ArgumentNullException(nameof(callback));
             }
 
             return entry.RegisterPostEvictionCallback(callback, null);
@@ -87,14 +87,14 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <param name="entry"></param>
         /// <param name="callback"></param>
         /// <param name="state"></param>
-        public static ICacheEntry RegisterPostEvictionCallback(this ICacheEntry entry, PostEvictionDelegate callback, object state)
+        public static ICacheEntry RegisterPostEvictionCallback(this ICacheEntry entry, PostEvictionDelegate callback, object? state)
         {
             if (callback == null)
             {
-                throw new ArgumentNullException("callback");
+                throw new ArgumentNullException(nameof(callback));
             }
 
-            entry.PostEvictionCallbacks.Add(new PostEvictionCallbackRegistration() { EvictionCallback = callback, State = state });
+            entry.PostEvictionCallbacks.Add(new PostEvictionCallbackRegistration { EvictionCallback = callback, State = state });
             return entry;
         }
 

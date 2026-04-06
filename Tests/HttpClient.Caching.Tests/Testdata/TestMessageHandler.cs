@@ -67,7 +67,7 @@ namespace HttpClient.Caching.Tests.TestData
             return this.CreateHttpResponseMessage();
         }
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
         protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             this.NumberOfCalls++;

@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Caching.InMemory.Internal;
+﻿using Microsoft.Extensions.Caching.InMemory.Internal;
 
 namespace Microsoft.Extensions.Caching.InMemory
 {
@@ -7,6 +6,6 @@ namespace Microsoft.Extensions.Caching.InMemory
     {
         public TimeSpan ExpirationScanFrequency { get; set; } = TimeSpan.FromMinutes(1.0);
 
-        public ISystemClock Clock { get; set; }
+        public ISystemClock? Clock { get; set; }
     }
 }
