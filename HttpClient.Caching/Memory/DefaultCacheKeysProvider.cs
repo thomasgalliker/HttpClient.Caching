@@ -1,9 +1,8 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text;
 using Microsoft.Extensions.Caching.Abstractions;
 
-namespace Microsoft.Extensions.Caching.InMemory
+namespace Microsoft.Extensions.Caching.Memory
 {
     /// <summary>
     ///     Provides keys to store or retrieve data in the cache in the default way (http method + http request Uri)

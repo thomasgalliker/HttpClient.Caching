@@ -2,7 +2,6 @@
 using System.Net.Http;
 using FluentAssertions;
 using HttpClient.Caching.Tests.TestData;
-using Microsoft.Extensions.Caching.InMemory;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Xunit;

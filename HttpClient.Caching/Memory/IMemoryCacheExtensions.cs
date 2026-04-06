@@ -1,26 +1,23 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Caching.Abstractions;
-using Microsoft.Extensions.Caching.Memory;
 
-namespace Microsoft.Extensions.Caching.InMemory
+namespace Microsoft.Extensions.Caching.Memory
 {
     /// <summary>
     ///     Extension methods for an <see cref="IMemoryCache" />.
     /// </summary>
     internal static class IMemoryCacheExtensions
     {
-        public static bool TryGetCacheData(this IMemoryCache cache, string key, [NotNullWhen(true)] out CacheData? cacheData)
+        public static bool TryGetCacheData(this IMemoryCache memoryCache, string key, [NotNullWhen(true)] out CacheData? cacheData)
         {
             var result = false;
             cacheData = null;
 
             try
             {
-                if (cache.TryGetValue<byte[]>(key, out var binaryData))
+                if (memoryCache.TryGetValue<byte[]>(key, out var binaryData))
                 {
-                    cacheData = binaryData.Deserialize();
+                    cacheData = binaryData!.Deserialize();
                     result = true;
                 }
             }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using FluentAssertions;
-using Microsoft.Extensions.Caching.InMemory;
+using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 
 namespace HttpClient.Caching.Tests.InMemory

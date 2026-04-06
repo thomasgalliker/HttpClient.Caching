@@ -1,11 +1,7 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 using Microsoft.Extensions.Caching.Abstractions;
-using Microsoft.Extensions.Caching.Memory;
 
-namespace Microsoft.Extensions.Caching.InMemory
+namespace Microsoft.Extensions.Caching.Memory
 {
     /// <summary>
     ///     Tries to retrieve the result from the HTTP call, and if it times out or results in an unsuccessful status code,
