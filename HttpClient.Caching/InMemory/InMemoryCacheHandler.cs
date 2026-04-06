@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         public IStatsProvider StatsProvider { get; }
 
         private readonly IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode;
-        private readonly IMemoryCache responseCache;
+        private readonly MemoryCache responseCache;
 
         /// <summary>
         /// Cache key provider being used
@@ -69,11 +69,12 @@ namespace Microsoft.Extensions.Caching.InMemory
         public InMemoryCacheHandler(HttpMessageHandler innerHandler = null,
             IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode = null,
             IStatsProvider statsProvider = null,
-            ICacheKeysProvider cacheKeysProvider = null)
+            ICacheKeysProvider cacheKeysProvider = null,
+            MemoryCacheOptions memoryCacheOptions = null)
             : this(innerHandler,
                 cacheExpirationPerHttpResponseCode,
                 statsProvider,
-                new MemoryCache(new MemoryCacheOptions()),
+                new MemoryCache(memoryCacheOptions ?? new MemoryCacheOptions()),
                 cacheKeysProvider)
         {
         }
@@ -96,7 +97,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             HttpMessageHandler innerHandler,
             IDictionary<HttpStatusCode, TimeSpan> cacheExpirationPerHttpResponseCode,
             IStatsProvider statsProvider,
-            IMemoryCache cache,
+            MemoryCache cache,
             ICacheKeysProvider cacheKeysProvider)
             : base(innerHandler ?? new HttpClientHandler())
         {

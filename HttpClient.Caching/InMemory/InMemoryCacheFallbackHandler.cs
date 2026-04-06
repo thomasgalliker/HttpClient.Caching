@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         public IStatsProvider StatsProvider { get; }
         private readonly TimeSpan maxTimeout;
         private readonly TimeSpan cacheDuration;
-        private readonly IMemoryCache responseCache;
+        private readonly MemoryCache responseCache;
         internal const string CacheFallbackKeyPrefix = "cfb";
 
         /// <summary>
@@ -28,8 +28,8 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     An <see cref="IStatsProvider" /> that records statistic information about the caching
         ///     behavior.
         /// </param>
-        public InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider = null)
-            : this(innerHandler, maxTimeout, cacheDuration, statsProvider, new MemoryCache(new MemoryCacheOptions()))
+        public InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider = null, MemoryCacheOptions memoryCacheOptions = null)
+            : this(innerHandler, maxTimeout, cacheDuration, statsProvider, new MemoryCache(memoryCacheOptions ?? new MemoryCacheOptions()))
         {
         }
 
@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     behavior.
         /// </param>
         /// <param name="cache">The cache to be used.</param>
-        internal InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider, IMemoryCache cache) : base(innerHandler ?? new HttpClientHandler())
+        internal InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider, MemoryCache cache) : base(innerHandler ?? new HttpClientHandler())
         {
             this.StatsProvider = statsProvider ?? new StatsProvider(nameof(InMemoryCacheHandler));
             this.maxTimeout = maxTimeout;
