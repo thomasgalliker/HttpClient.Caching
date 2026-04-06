@@ -2,11 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net48;net10.0</TargetFrameworks>
-    <AssemblyName>HttpClient.Caching.Tests</AssemblyName>
-    <PackageId>HttpClient.Caching.Tests</PackageId>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <RootNamespace>HttpClient.Caching.Tests</RootNamespace>
-    <NeutralLanguage>en</NeutralLanguage>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 	<ItemGroup>
