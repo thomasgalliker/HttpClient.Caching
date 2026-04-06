@@ -18,7 +18,7 @@
     <Version>1.0.0</Version>
     <Authors>Thomas Galliker</Authors>
     <PackageId>HttpClient.Caching</PackageId>
-    <PackageTags>retry;resilience;resilient;fault;failure;http;handler;HttpRetryHelper;ApiClient;ApiService</PackageTags>
+    <PackageTags>httpclient.caching;httpclient;caching;cache;inmemory</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
