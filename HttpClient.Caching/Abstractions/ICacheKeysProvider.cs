@@ -10,8 +10,8 @@ namespace Microsoft.Extensions.Caching.Abstractions
         /// <summary>
         ///     Return the key for the request message <paramref name="request"/>
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
+        /// <param name="request">The http request message.</param>
+        /// <returns>The cache key.</returns>
         string GetKey(HttpRequestMessage request);
     }
 }

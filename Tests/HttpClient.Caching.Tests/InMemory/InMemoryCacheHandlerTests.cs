@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using HttpClient.Caching.Tests.TestData;
 using Microsoft.Extensions.Caching.InMemory;
+using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 
 namespace HttpClient.Caching.Tests.InMemory
@@ -414,6 +415,8 @@ namespace HttpClient.Caching.Tests.InMemory
             var response = await client.GetAsync("http://unittest");
 
             // Assert
+            response.Content.Headers.Should().NotBeNull();
+            response.Content.Headers.ContentType.Should().NotBeNull();
             response.Content.Headers.ContentType.MediaType.Should().Be("text/plain");
             response.Content.Headers.ContentType.CharSet.Should().Be("utf-8");
         }

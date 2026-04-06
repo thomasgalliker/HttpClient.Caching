@@ -1,10 +1,7 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HttpClient.Caching.Tests.TestData
 {
@@ -17,8 +14,8 @@ namespace HttpClient.Caching.Tests.TestData
         private readonly HttpStatusCode responseStatusCode;
         private readonly string content;
         private readonly string contentType;
-        private readonly TimeSpan delay;
-        private readonly CacheControlHeaderValue cacheControl;
+        private readonly TimeSpan? delay;
+        private readonly CacheControlHeaderValue? cacheControl;
         private readonly Encoding encoding;
 
         public int NumberOfCalls { get; set; }
@@ -27,9 +24,9 @@ namespace HttpClient.Caching.Tests.TestData
             HttpStatusCode responseStatusCode = DefaultResponseStatusCode,
             string content = DefaultContent,
             string contentType = DefaultContentType,
-            Encoding encoding = null,
-            TimeSpan delay = default,
-            CacheControlHeaderValue cacheControl = null)
+            Encoding? encoding = null,
+            TimeSpan? delay = null,
+            CacheControlHeaderValue? cacheControl = null)
         {
             this.responseStatusCode = responseStatusCode;
             this.content = content;
@@ -59,9 +56,9 @@ namespace HttpClient.Caching.Tests.TestData
         {
             this.NumberOfCalls++;
 
-            if (this.delay != default)
+            if (this.delay is TimeSpan delay)
             {
-                await Task.Delay(this.delay, cancellationToken);
+                await Task.Delay(delay, cancellationToken);
             }
 
             return this.CreateHttpResponseMessage();
@@ -72,9 +69,9 @@ namespace HttpClient.Caching.Tests.TestData
         {
             this.NumberOfCalls++;
 
-            if (this.delay != default)
+            if (this.delay is TimeSpan delay)
             {
-                Thread.Sleep(this.delay);
+                Thread.Sleep(delay);
             }
 
             return this.CreateHttpResponseMessage();

@@ -1,5 +1,6 @@
 2.0
 - Replace Newtonsoft.Json with System.Text.Json.
+- Replace MemoryCache implementation with Microsoft.Extensions.Caching.Memory.
 - Drop support for netstandard 1.2.
 - Maintenance updates.
 

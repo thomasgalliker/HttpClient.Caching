@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Abstractions;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Caching.Abstractions;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Microsoft.Extensions.Caching.InMemory
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Extensions.Caching.InMemory
 
             try
             {
-                if (cache.TryGetValue(key, out byte[]? binaryData))
+                if (cache.TryGetValue<byte[]>(key, out var binaryData))
                 {
                     cacheData = binaryData.Deserialize();
                     result = true;
