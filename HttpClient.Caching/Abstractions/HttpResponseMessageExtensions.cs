@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.Caching.Abstractions
             return httpResponseMessage.ToCacheEntry(contentBytes);
         }
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
         public static CacheData ToCacheEntry(this HttpResponseMessage httpResponseMessage)
         {
             using var contentStream = httpResponseMessage.Content.ReadAsStream();

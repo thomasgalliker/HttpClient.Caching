@@ -28,7 +28,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     An <see cref="IStatsProvider" /> that records statistic information about the caching
         ///     behavior.
         /// </param>
-        public InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider = null)
+        public InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider? statsProvider = null)
             : this(innerHandler, maxTimeout, cacheDuration, statsProvider, new MemoryCache(new MemoryCacheOptions()))
         {
         }
@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         ///     behavior.
         /// </param>
         /// <param name="cache">The cache to be used.</param>
-        internal InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider statsProvider, IMemoryCache cache) : base(innerHandler ?? new HttpClientHandler())
+        internal InMemoryCacheFallbackHandler(HttpMessageHandler innerHandler, TimeSpan maxTimeout, TimeSpan cacheDuration, IStatsProvider? statsProvider, IMemoryCache? cache) : base(innerHandler ?? new HttpClientHandler())
         {
             this.StatsProvider = statsProvider ?? new StatsProvider(nameof(InMemoryCacheHandler));
             this.maxTimeout = maxTimeout;
@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.Caching.InMemory
                 return await base.SendAsync(request, cancellationToken);
             }
 
-            var key = CacheFallbackKeyPrefix + request.Method + request.RequestUri.ToString();
+            var key = $"{CacheFallbackKeyPrefix}{request.Method}{request.RequestUri}";
 
             // start 3 tasks
             var httpSendTask = base.SendAsync(request, cancellationToken);
@@ -111,9 +111,9 @@ namespace Microsoft.Extensions.Caching.InMemory
             return response;
         }
 
-        private HttpResponseMessage ExtractCachedResponse(HttpRequestMessage request, string key)
+        private HttpResponseMessage? ExtractCachedResponse(HttpRequestMessage request, string key)
         {
-            // it's in the cache, return that result
+            // It's in the cache, return that result
             if (this.responseCache.TryGetCacheData(key, out var data))
             {
                 // get the data from the cache
@@ -125,7 +125,7 @@ namespace Microsoft.Extensions.Caching.InMemory
             return null;
         }
 
-        private async Task<CacheData> SaveToCache(HttpResponseMessage response, string key)
+        private async Task<CacheData?> SaveToCache(HttpResponseMessage response, string key)
         {
             if ((int)response.StatusCode < 500 && TimeSpan.Zero != this.cacheDuration)
             {

@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// </summary>
         public TimeSpan? SlidingExpiration
         {
-            get { return this.slidingExpiration; }
+            get => this.slidingExpiration;
             set
             {
                 var nullable = value;

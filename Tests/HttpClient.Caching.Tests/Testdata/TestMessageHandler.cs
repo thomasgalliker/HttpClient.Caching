@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HttpClient.Caching.Tests.Testdata
+namespace HttpClient.Caching.Tests.TestData
 {
     internal class TestMessageHandler : HttpMessageHandler
     {
@@ -67,7 +67,7 @@ namespace HttpClient.Caching.Tests.Testdata
             return this.CreateHttpResponseMessage();
         }
 
-#if NET5_0_OR_GREATER
+#if NET8_0_OR_GREATER
         protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             this.NumberOfCalls++;

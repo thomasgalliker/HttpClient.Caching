@@ -1,31 +1,33 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using System.Net;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Caching.Internals;
 
 namespace Microsoft.Extensions.Caching.Abstractions
 {
     public static class CacheDataExtensions
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new CacheDataJsonConverter() }
+        };
+
         public static byte[] Serialize(this CacheData cacheData)
         {
-            var json = JsonConvert.SerializeObject(cacheData);
-            var bytes = new byte[json.Length * sizeof(char)];
-            Buffer.BlockCopy(json.ToCharArray(), 0, bytes, 0, bytes.Length);
-            return bytes;
+            return JsonSerializer.SerializeToUtf8Bytes(cacheData, SerializerOptions);
         }
 
         public static CacheData Deserialize(this byte[] cacheData)
         {
             try
             {
-                var chars = new char[cacheData.Length / sizeof(char)];
-                Buffer.BlockCopy(cacheData, 0, chars, 0, cacheData.Length);
-                var json = new string(chars);
-                var data = JsonConvert.DeserializeObject<CacheData>(json);
-                return data;
+                return JsonSerializer.Deserialize<CacheData>(cacheData, SerializerOptions)!;
             }
             catch
             {
-                return null;
+                return null!;
             }
         }
     }

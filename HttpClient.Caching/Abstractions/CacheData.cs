@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Microsoft.Extensions.Caching.Abstractions

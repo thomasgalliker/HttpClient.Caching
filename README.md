@@ -37,7 +37,7 @@ public async Task<TResult> GetAsync<TResult>(string uri, TimeSpan? cacheExpirati
 
     var httpResponseMessage = await this.HandleRequest(() => this.httpClient.GetAsync(uri));
     var jsonResponse = await this.HandleResponse(httpResponseMessage);
-    result = await Task.Run(() => JsonConvert.DeserializeObject<TResult>(jsonResponse, this.serializerSettings));
+    result = await Task.Run(() => JsonSerializer.Deserialize<TResult>(jsonResponse, this.serializerSettings));
 
     if (caching)
     {
