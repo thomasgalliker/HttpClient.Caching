@@ -12,7 +12,7 @@ namespace ConsoleAppSample
     {
         private static async Task Main(string[] args)
         {
-            const string url = "http://worldtimeapi.org/api/timezone/Europe/Zurich";
+            const string url = "https://www.timeapi.io/api/v1/time/current/utc";
 
             // HttpClient uses an HttpClientHandler nested into InMemoryCacheHandler in order to handle http get response caching
             var httpClientHandler = new HttpClientHandler();
