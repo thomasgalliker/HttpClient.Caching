@@ -1,32 +1,31 @@
 ####################################################################
-# VSTS Build Configuration, Version 1.4
+# Azure DevOps Build Configuration
 #
-# (c)2022 superdev GmbH
+# (c)2026 superdev GmbH
 ####################################################################
 
 name: $[format('{0}', variables['buildName'])]
 
 pool:
-  vmImage: 'windows-2022'
+  vmImage: 'windows-latest'
 
 trigger:
   branches:
     include:
-    - main
-    - develop
-    - feature/*
-    - bugfix/*
+      - main
+      - develop
+      - feature/*
+      - bugfix/*
 
   paths:
     exclude:
-    - Docs/*
+      - Docs/*
 
 variables:
-  solution: 'HttpClient.Caching.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   majorVersion: 1
-  minorVersion: 6
+  minorVersion: 7
   patchVersion: $[counter(format('{0}.{1}', variables.majorVersion, variables.minorVersion), 0)]
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
     # Versioning: 1.0.0
@@ -40,96 +39,101 @@ variables:
   buildName: $[format('{0}', variables.semVersion)]
 
 steps:
-- task: Bash@3
-  displayName: 'Print all variables'
-  inputs:
-    targetType: 'inline'
-    script: 'env | sort'
-   
-- task: Assembly-Info-NetCore@2
-  displayName: 'Update Assembly Info'
-  inputs:
-    Path: '$(Build.SourcesDirectory)'
-    FileNames: |
-      **/*.csproj
-    InsertAttributes: true
-    FileEncoding: 'auto'
-    WriteBOM: false
-    Product: 'HttpClient.Caching'
-    Description: ''
-    Company: 'superdev GmbH'
-    Copyright: '(c) $(date:YYYY) superdev GmbH'
-    VersionNumber: '$(Build.BuildNumber)'
-    FileVersionNumber: '$(Build.BuildNumber)'
-    InformationalVersion: '$(Build.BuildNumber)'
-    PackageVersion: '$(Build.BuildNumber)'
-    LogLevel: 'verbose'
-    FailOnWarning: false
-    DisableTelemetry: true
-    
-- task: UseDotNet@2
-  displayName: 'Use .NET 8.x'
-  inputs:
-    version: 8.x
-    
-- task: NuGetToolInstaller@0
-  displayName: 'Use NuGet 6.x'
-  inputs:
-    versionSpec: 6.x
+  - task: Bash@3
+    displayName: 'Print all variables'
+    inputs:
+      targetType: 'inline'
+      script: 'env | sort'
 
-- task: DotNetCoreCLI@2
-  displayName: 'NuGet restore'
-  inputs:
-    command: restore
-    projects: '$(solution)'
+  - task: Assembly-Info-NetCore@3
+    displayName: 'Update Assembly Info'
+    inputs:
+      Path: '$(Build.SourcesDirectory)'
+      FileNames: |
+        **/*.csproj
+      InsertAttributes: true
+      FileEncoding: 'auto'
+      WriteBOM: false
+      Product: 'HttpClient.Caching'
+      Description: ''
+      Company: 'superdev GmbH'
+      Copyright: '(c) $(date:YYYY) superdev GmbH'
+      VersionNumber: '$(Build.BuildNumber)'
+      FileVersionNumber: '$(Build.BuildNumber)'
+      InformationalVersion: '$(Build.BuildNumber)'
+      PackageVersion: '$(Build.BuildNumber)'
+      LogLevel: 'verbose'
+      FailOnWarning: false
+      DisableTelemetry: true
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build solution'
-  inputs:
-    projects: '$(solution)'
-    arguments: '--no-restore --configuration $(buildConfiguration)'
-    
-- task: DotNetCoreCLI@2
-  displayName: 'Run UnitTests'
-  inputs:
-    command: test
-    projects: '**/*.Tests.csproj'
-    arguments: '--no-restore --no-build --configuration $(buildConfiguration) --framework net8.0 /p:CollectCoverage=true /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" /p:CoverletOutput=UnitTests.coverage.cobertura.xml /p:MergeWith=$(Build.SourcesDirectory)/Tests/CoverletOutput/coverage.json /p:CoverletOutputFormat=cobertura'
-    
-- task: reportgenerator@5
-  displayName: 'Create Code Coverage Report'
-  inputs:
-    reports: '$(Build.SourcesDirectory)/Tests/**/*.coverage.cobertura*.xml'
-    targetdir: '$(Build.SourcesDirectory)/CodeCoverage'
-    reporttypes: 'Cobertura'
-    assemblyfilters: '-xunit*'
-    
-- task: DotNetCoreCLI@2
-  displayName: 'Pack HttpClient.Caching'
-  inputs:
-    command: pack
-    packagesToPack: HttpClient.Caching/HttpClient.Caching.csproj
-    versioningScheme: byEnvVar
-    versionEnvVar: semVersion
-    nobuild: true
+  - task: UseDotNet@2
+    displayName: 'Use .NET SDK from global.json'
+    inputs:
+      packageType: 'sdk'
+      useGlobalJson: true
+      workingDirectory: '$(Build.SourcesDirectory)'
 
-- task: CopyFiles@2
-  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
-  inputs:
-    SourceFolder: '$(system.defaultworkingdirectory)'
+  - task: NuGetToolInstaller@0
+    displayName: 'Use NuGet 6.x'
+    inputs:
+      versionSpec: 6.x
 
-    Contents: |
-     **\bin\$(BuildConfiguration)\**
-     **\bin\*.nupkg
+  - task: DotNetCoreCLI@2
+    displayName: 'NuGet restore'
+    inputs:
+      command: restore
+      projects: |
+        HttpClient.Caching/**/*.csproj
+        **/*.Tests.csproj
 
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-     
-- task: PublishCodeCoverageResults@2
-  displayName: 'Publish code coverage'
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml'
-    reportDirectory: '$(Build.SourcesDirectory)/CodeCoverage'
+  - task: DotNetCoreCLI@2
+    displayName: 'Build solution'
+    inputs:
+      projects: |
+        HttpClient.Caching/**/*.csproj
+        **/*.Tests.csproj
+      arguments: '--no-restore --configuration $(buildConfiguration)'
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: drop'
+  - task: DotNetCoreCLI@2
+    displayName: 'Run UnitTests'
+    inputs:
+      command: test
+      projects: '**/*.Tests.csproj'
+      arguments: '--no-restore --no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" /p:CoverletOutput=UnitTests.coverage.cobertura.xml /p:MergeWith=$(Build.SourcesDirectory)/Tests/CoverletOutput/coverage.json /p:CoverletOutputFormat=cobertura'
+
+  - task: reportgenerator@5
+    displayName: 'Create Code Coverage Report'
+    inputs:
+      reports: '$(Build.SourcesDirectory)/Tests/**/*.coverage.cobertura*.xml'
+      targetdir: '$(Build.SourcesDirectory)/CodeCoverage'
+      reporttypes: 'Cobertura'
+      assemblyfilters: '-xunit*'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Pack HttpClient.Caching'
+    inputs:
+      command: pack
+      packagesToPack: HttpClient.Caching/HttpClient.Caching.csproj
+      versioningScheme: byEnvVar
+      versionEnvVar: semVersion
+      nobuild: true
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+    inputs:
+      SourceFolder: '$(system.defaultworkingdirectory)'
+      Contents: |
+        **\bin\*.nupkg
+        **\bin\*.snupkg
+        **\ReleaseNotes.txt
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: PublishCodeCoverageResults@2
+    displayName: 'Publish code coverage'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml'
+      reportDirectory: '$(Build.SourcesDirectory)/CodeCoverage'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: drop'
