@@ -1,53 +1,55 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<Description>HttpClient.Caching adds http response caching to HttpClient.</Description>
-		<AssemblyTitle>HttpClient.Caching</AssemblyTitle>
-		<VersionPrefix>1.0.0</VersionPrefix>
-		<Version>1.0.0</Version>
-		<Authors>Thomas Galliker</Authors>
-		<TargetFrameworks>net48;netstandard1.2;netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
-		<AssemblyName>HttpClient.Caching</AssemblyName>
+  <PropertyGroup>
+    <TargetFrameworks>net48;netstandard2.0;netstandard2.1;net8.0;net9.0;net10.0</TargetFrameworks>
+    <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Extensions.Caching</RootNamespace>
-		<PackageId>HttpClient.Caching</PackageId>
-		<PackageTags>httpclient.caching;httpclient;caching;cache;inmemory</PackageTags>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <SignAssembly>True</SignAssembly>
+  </PropertyGroup>
+
+  <!--NuGet package-->
+  <PropertyGroup>
+    <Product>HttpClient.Caching</Product>
+    <Description>HTTP response caching for HttpClient.</Description>
+    <Version>1.0.0</Version>
+    <Authors>Thomas Galliker</Authors>
+    <PackageId>HttpClient.Caching</PackageId>
+    <PackageTags>retry;resilience;resilient;fault;failure;http;handler;HttpRetryHelper;ApiClient;ApiService</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageProjectUrl>https://github.com/thomasgalliker/HttpClient.Caching</PackageProjectUrl>
-		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/thomasgalliker/HttpClient.Caching</RepositoryUrl>
-		<PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.2' ">$(PackageTargetFallback);netcoreapp1.0</PackageTargetFallback>
-		<NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.2' ">1.6.1</NetStandardImplicitPackageVersion>
-		<SignAssembly>True</SignAssembly>
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<Company>superdev GmbH</Company>
-		<Product>HttpClient.Caching</Product>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/thomasgalliker/HttpClient.Caching</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/thomasgalliker/HttpClient.Caching</RepositoryUrl>
+    <Company>superdev GmbH</Company>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
-		<PackageReleaseNotes>
-1.3
-- Add ICacheKeysProvider which allows to specify custom cache keys
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../ReleaseNotes.txt"))</PackageReleaseNotes>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedAllSources>true</EmbedAllSources>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
 
-1.0
-- Initial release
-		</PackageReleaseNotes>
-	</PropertyGroup>
-  
   <ItemGroup>
-    <None Include="..\Images\logo.png" Pack="True" PackagePath="\" />
     <None Include="..\README.md" Pack="True" PackagePath="\" />
     <None Include="..\LICENSE" Pack="True" PackagePath="\" />
+    <None Include="..\logo.png" Pack="True" PackagePath="\" />
   </ItemGroup>
-  
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="[13.0.1,)" />
-	</ItemGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
-		<Reference Include="System.Net.Http" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
 </Project>
