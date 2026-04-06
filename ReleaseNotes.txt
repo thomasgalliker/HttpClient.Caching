@@ -1,5 +1,7 @@
 2.0
-- Replace own implementation of MemoryCache with Microsoft.Extensions.Caching.Memory.
+- Replace Newtonsoft.Json with System.Text.Json.
+- Drop support for netstandard 1.2.
+- Maintenance updates.
 
 1.3
 - Add ICacheKeysProvider which allows to specify custom cache keys.
