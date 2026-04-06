@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
-using HttpClient.Caching.Tests.Testdata;
+using HttpClient.Caching.Tests.TestData;
 using Microsoft.Extensions.Caching.Abstractions;
 using Microsoft.Extensions.Caching.InMemory;
 using Moq;

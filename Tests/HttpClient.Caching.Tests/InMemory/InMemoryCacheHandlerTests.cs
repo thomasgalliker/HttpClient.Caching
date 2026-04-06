@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
-using HttpClient.Caching.Tests.Testdata;
+using HttpClient.Caching.Tests.TestData;
 using Microsoft.Extensions.Caching.InMemory;
 using Xunit;
 

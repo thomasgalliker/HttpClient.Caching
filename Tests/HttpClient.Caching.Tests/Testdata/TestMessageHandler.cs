@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HttpClient.Caching.Tests.Testdata
+namespace HttpClient.Caching.Tests.TestData
 {
     internal class TestMessageHandler : HttpMessageHandler
     {
