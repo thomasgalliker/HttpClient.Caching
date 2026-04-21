@@ -3,12 +3,9 @@ using Microsoft.Extensions.Caching.Abstractions;
 
 namespace Microsoft.Extensions.Caching.Memory
 {
-    /// <summary>
-    ///     Extension methods for an <see cref="IMemoryCache" />.
-    /// </summary>
     internal static class IMemoryCacheExtensions
     {
-        public static bool TryGetCacheData(this IMemoryCache memoryCache, string key, [NotNullWhen(true)] out CacheData? cacheData)
+        internal static bool TryGetCacheData(this IMemoryCache memoryCache, string key, [NotNullWhen(true)] out CacheData? cacheData)
         {
             var result = false;
             cacheData = null;
@@ -37,7 +34,7 @@ namespace Microsoft.Extensions.Caching.Memory
         /// <param name="cacheData">The value of this cache entry.</param>
         /// <param name="absoluteExpirationRelativeToNow">Expiration relative to now.</param>
         /// <returns>A task, when completed, has tried to put the entry into the cache.</returns>
-        public static Task<bool> TrySetAsync(this IMemoryCache cache, string key, CacheData cacheData, TimeSpan absoluteExpirationRelativeToNow)
+        internal static Task<bool> TrySetAsync(this IMemoryCache cache, string key, CacheData cacheData, TimeSpan absoluteExpirationRelativeToNow)
         {
             try
             {
@@ -51,7 +48,7 @@ namespace Microsoft.Extensions.Caching.Memory
             }
         }
 
-        public static bool TrySetCacheData(this IMemoryCache cache, string key, CacheData value, TimeSpan absoluteExpirationRelativeToNow)
+        internal static bool TrySetCacheData(this IMemoryCache cache, string key, CacheData value, TimeSpan absoluteExpirationRelativeToNow)
         {
             bool result;
 

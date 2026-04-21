@@ -21,20 +21,44 @@ namespace HttpClient.Caching.Tests
             // Arrange
             var expirationTimeSpan = TimeSpan.FromHours(1);
             var options = new MemoryCacheOptions();
-            var cache = new MemoryCache(options);
-            var cacheEntryOptions = new MemoryCacheEntryOptions { SlidingExpiration = expirationTimeSpan };
+            var memoryCache = new MemoryCache(options);
+            var entryOptions = new MemoryCacheEntryOptions { SlidingExpiration = expirationTimeSpan };
 
             // Act
             for (var i = 1; i <= 10; i++)
             {
-                cache.Set($"{i}", new TestPayload(i), cacheEntryOptions);
+                memoryCache.Set($"{i}", new TestPayload(i), entryOptions);
             }
 
             // Assert
-            cache.TryGetValue("1", out var result1);
+            memoryCache.TryGetValue("1", out var result1);
             result1.Should().NotBeNull();
             result1.Should().BeOfType<TestPayload>().Which.Id.Should().Be(1);
-            cache.Count.Should().Be(10);
+            memoryCache.Count.Should().Be(10);
+        }
+
+        [Fact]
+        public void ShouldClearCache()
+        {
+            // Arrange
+            var options = new MemoryCacheEntryOptions
+            {
+                SlidingExpiration = TimeSpan.FromHours(1)
+            };
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+
+            for (var i = 1; i <= 10; i++)
+            {
+                memoryCache.Set($"{i}", new TestPayload(i), options);
+            }
+
+            // Act
+            ((IMemoryCache)memoryCache).Clear();
+
+            // Assert
+            memoryCache.Count.Should().Be(0);
+            memoryCache.TryGetValue("1", out var result1).Should().BeFalse();
+            result1.Should().BeNull();
         }
     }
 }
