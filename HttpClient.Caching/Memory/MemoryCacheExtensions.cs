@@ -6,6 +6,29 @@ namespace Microsoft.Extensions.Caching.Memory
     public static class MemoryCacheExtensions
     {
         /// <summary>
+        /// Tries to get the value associated with the given key.
+        /// </summary>
+        /// <typeparam name="TItem">The type of the object to get.</typeparam>
+        /// <param name="cache">The <see cref="IMemoryCache"/> instance this method extends.</param>
+        /// <param name="key">The key of the value to get.</param>
+        /// <param name="value">The value associated with the given key.</param>
+        /// <returns><c>true</c> if the key was found; <c>false</c> otherwise.</returns>
+        public static bool TryGetValue<TItem>(this IMemoryCache cache, object key, [NotNullWhen(true)] out TItem? value)
+        {
+            if (cache.TryGetValue(key, out var result))
+            {
+                if (result is TItem item)
+                {
+                    value = item;
+                    return true;
+                }
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
         ///     Clears all entries from the cache.
         /// </summary>
         /// <param name="memoryCache">The cache to clear.</param>
@@ -34,9 +57,9 @@ namespace Microsoft.Extensions.Caching.Memory
 
             try
             {
-                if (memoryCache.TryGetValue<byte[]>(key, out var binaryData))
+                if (TryGetValue<byte[]>(memoryCache, key, out var binaryData))
                 {
-                    cacheData = binaryData!.Deserialize();
+                    cacheData = binaryData.Deserialize();
                     result = true;
                 }
             }
