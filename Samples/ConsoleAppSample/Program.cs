@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Abstractions;
-using Microsoft.Extensions.Caching.InMemory;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ConsoleAppSample
 {

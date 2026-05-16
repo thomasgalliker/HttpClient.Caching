@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Caching.Abstractions;
 
-namespace Microsoft.Extensions.Caching.InMemory
+namespace Microsoft.Extensions.Caching.Memory
 {
     /// <summary>
     ///     Tries to retrieve the result from an InMemory cache, and if that's not available, gets the value from the

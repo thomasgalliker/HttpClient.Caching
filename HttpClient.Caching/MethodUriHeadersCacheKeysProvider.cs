@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text;
 using Microsoft.Extensions.Caching.Abstractions;
 
-namespace Microsoft.Extensions.Caching.InMemory
+namespace Microsoft.Extensions.Caching.Memory
 {
     /// <summary>
     ///     Provides keys to store or retrieve data in the cache by using http method, specific headers and Uri

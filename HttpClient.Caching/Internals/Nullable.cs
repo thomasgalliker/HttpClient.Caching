@@ -1,4 +1,4 @@
-#if NET48_OR_GREATER || NETSTANDARD1_2 || NETSTANDARD2_0
+#if NET462_OR_GREATER || NETSTANDARD1_2 || NETSTANDARD2_0
 // ReSharper disable once CheckNamespace
 namespace System.Diagnostics.CodeAnalysis
 {
