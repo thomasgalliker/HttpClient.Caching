@@ -1,10 +1,4 @@
-﻿using FluentAssertions;
-using HttpClient.Caching.Tests.TestData;
-using Microsoft.Extensions.Caching.Memory;
-using Xunit;
-using Xunit.Abstractions;
-
-namespace HttpClient.Caching.Tests.Extensions
+﻿namespace HttpClient.Caching.Tests.Extensions
 {
     public class MemoryCacheExtensionsTests
     {

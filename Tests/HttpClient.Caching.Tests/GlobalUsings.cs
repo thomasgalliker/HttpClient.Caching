@@ -1,0 +1,14 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.Net;
+global using System.Net.Http;
+global using System.Net.Http.Headers;
+global using System.Text;
+global using AwesomeAssertions;
+global using HttpClient.Caching.Tests.TestData;
+global using Microsoft.Extensions.Caching.Abstractions;
+global using Microsoft.Extensions.Caching.Memory;
+global using Moq;
+global using Xunit;
+global using Xunit.Abstractions;

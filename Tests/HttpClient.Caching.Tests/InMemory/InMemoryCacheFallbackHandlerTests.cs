@@ -1,18 +1,10 @@
-﻿using System.Net;
-using System.Net.Http;
-using FluentAssertions;
-using HttpClient.Caching.Tests.TestData;
-using Microsoft.Extensions.Caching.Memory;
-using Moq;
-using Xunit;
-
-namespace HttpClient.Caching.Tests.InMemory
+﻿namespace HttpClient.Caching.Tests.InMemory
 {
     using HttpClient = System.Net.Http.HttpClient;
 
     public class InMemoryCacheFallbackHandlerTests
     {
-        private readonly string url = "http://unittest/";
+        private const string TestUrl = "http://unittest/";
 
         [Fact]
         public async Task AlwaysCallsTheHttpHandler()
@@ -23,9 +15,9 @@ namespace HttpClient.Caching.Tests.InMemory
             var client = new HttpClient(new InMemoryCacheFallbackHandler(testMessageHandler, TimeSpan.FromDays(1), TimeSpan.FromDays(1), null, cache));
 
             // Act twice
-            await client.GetAsync(this.url);
-            cache.Get(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + this.url).Should().NotBeNull(); // ensure it's cached before the 2nd call
-            await client.GetAsync(this.url);
+            await client.GetAsync(TestUrl);
+            cache.Get(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + TestUrl).Should().NotBeNull(); // ensure it's cached before the 2nd call
+            await client.GetAsync(TestUrl);
 
             // Assert
             testMessageHandler.NumberOfCalls.Should().Be(2);
@@ -38,14 +30,14 @@ namespace HttpClient.Caching.Tests.InMemory
             var testMessageHandler = new TestMessageHandler();
             var cache = new Mock<IMemoryCache>(MockBehavior.Strict);
             var cacheTime = TimeSpan.FromSeconds(123);
-            cache.Setup(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + this.url));
+            cache.Setup(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + TestUrl));
             var client = new HttpClient(new InMemoryCacheFallbackHandler(testMessageHandler, TimeSpan.FromDays(1), cacheTime, null, cache.Object));
 
             // Act twice, validate cache is called each time
-            await client.GetAsync(this.url);
-            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + this.url), Times.Once);
-            await client.GetAsync(this.url);
-            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + this.url), Times.Exactly(2));
+            await client.GetAsync(TestUrl);
+            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + TestUrl), Times.Once);
+            await client.GetAsync(TestUrl);
+            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + TestUrl), Times.Exactly(2));
         }
 
         [Fact]
@@ -55,15 +47,15 @@ namespace HttpClient.Caching.Tests.InMemory
             var testMessageHandler = new TestMessageHandler();
             var cache = new Mock<IMemoryCache>(MockBehavior.Strict);
             var cacheTime = TimeSpan.FromSeconds(123);
-            cache.Setup(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + this.url));
-            cache.Setup(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Head + this.url));
+            cache.Setup(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + TestUrl));
+            cache.Setup(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Head + TestUrl));
             var client = new HttpClient(new InMemoryCacheFallbackHandler(testMessageHandler, TimeSpan.FromDays(1), cacheTime, null, cache.Object));
 
             // Act twice, validate cache is called each time
-            await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, this.url));
-            await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, this.url));
-            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Head + this.url), Times.Once);
-            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + this.url), Times.Once);
+            await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, TestUrl));
+            await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, TestUrl));
+            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Head + TestUrl), Times.Once);
+            cache.Verify(c => c.CreateEntry(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + TestUrl), Times.Once);
         }
 
         [Fact]
@@ -75,11 +67,11 @@ namespace HttpClient.Caching.Tests.InMemory
             var cacheTime = TimeSpan.FromSeconds(123);
             object? expectedValue;
             cache.Setup(c => c.CreateEntry(It.IsAny<string>()));
-            cache.Setup(c => c.TryGetValue(this.url, out expectedValue)).Returns(false);
+            cache.Setup(c => c.TryGetValue(TestUrl, out expectedValue)).Returns(false);
             var client = new HttpClient(new InMemoryCacheFallbackHandler(testMessageHandler, TimeSpan.FromDays(1), cacheTime, null, cache.Object));
 
             // Act
-            await client.GetAsync(this.url);
+            await client.GetAsync(TestUrl);
 
             // Assert
             cache.Verify(c => c.CreateEntry(It.IsAny<string>()), Times.Never);
@@ -93,11 +85,11 @@ namespace HttpClient.Caching.Tests.InMemory
             var cache = new Mock<IMemoryCache>(MockBehavior.Strict);
             var cacheTime = TimeSpan.FromSeconds(123);
             object? expectedValue;
-            cache.Setup(c => c.TryGetValue(this.url, out expectedValue)).Returns(false);
+            cache.Setup(c => c.TryGetValue(TestUrl, out expectedValue)).Returns(false);
             var client = new HttpClient(new InMemoryCacheFallbackHandler(testMessageHandler, TimeSpan.FromDays(1), cacheTime, null, cache.Object));
 
             // Act
-            var result = await client.GetAsync(this.url);
+            var result = await client.GetAsync(TestUrl);
 
             // Assert
             result.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
@@ -114,9 +106,9 @@ namespace HttpClient.Caching.Tests.InMemory
             var client2 = new HttpClient(new InMemoryCacheFallbackHandler(testMessageHandler2, TimeSpan.FromMilliseconds(1), TimeSpan.FromDays(1), null, cache));
 
             // Act twice
-            var result1 = await client1.GetAsync(this.url);
-            cache.Get(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + this.url).Should().NotBeNull();
-            var result2 = await client2.GetAsync(this.url);
+            var result1 = await client1.GetAsync(TestUrl);
+            cache.Get(InMemoryCacheFallbackHandler.CacheFallbackKeyPrefix + HttpMethod.Get + TestUrl).Should().NotBeNull();
+            var result2 = await client2.GetAsync(TestUrl);
 
             // Assert
             // - that each message handler got called
@@ -141,8 +133,8 @@ namespace HttpClient.Caching.Tests.InMemory
             var client2 = new HttpClient(new InMemoryCacheFallbackHandler(testMessageHandler2, TimeSpan.FromDays(1), TimeSpan.FromDays(1), null, cache));
 
             // Act twice
-            var result1 = await client1.GetAsync(this.url);
-            var result2 = await client2.GetAsync(this.url);
+            var result1 = await client1.GetAsync(TestUrl);
+            var result2 = await client2.GetAsync(TestUrl);
 
             // Assert
             // - that each message handler got called

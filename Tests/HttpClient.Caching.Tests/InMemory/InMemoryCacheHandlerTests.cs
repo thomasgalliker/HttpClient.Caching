@@ -1,13 +1,4 @@
-﻿using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using FluentAssertions;
-using HttpClient.Caching.Tests.TestData;
-using Microsoft.Extensions.Caching.Memory;
-using Xunit;
-
-namespace HttpClient.Caching.Tests.InMemory
+﻿namespace HttpClient.Caching.Tests.InMemory
 {
     using HttpClient = System.Net.Http.HttpClient;
 

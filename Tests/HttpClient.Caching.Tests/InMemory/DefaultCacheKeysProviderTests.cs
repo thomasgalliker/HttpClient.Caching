@@ -1,14 +1,8 @@
-﻿using System;
-using System.Net.Http;
-using FluentAssertions;
-using Microsoft.Extensions.Caching.Memory;
-using Xunit;
-
-namespace HttpClient.Caching.Tests.InMemory
+﻿namespace HttpClient.Caching.Tests.InMemory
 {
     public class DefaultCacheKeysProviderTests
     {
-        private readonly string url = "http://unittest/";
+        private const string TestUrl = "http://unittest/";
 
         [Fact]
         public void ShouldGetKey()
@@ -17,7 +11,7 @@ namespace HttpClient.Caching.Tests.InMemory
             var cacheKeysProvider = new DefaultCacheKeysProvider();
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(this.url),
+                RequestUri = new Uri(TestUrl),
                 Method = HttpMethod.Get,
             };
 

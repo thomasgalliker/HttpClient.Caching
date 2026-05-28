@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using FluentAssertions;
-using Microsoft.Extensions.Caching.Abstractions;
-using Xunit;
-
 namespace HttpClient.Caching.Tests.Abstractions
 {
     public class CacheDataExtensionsTests

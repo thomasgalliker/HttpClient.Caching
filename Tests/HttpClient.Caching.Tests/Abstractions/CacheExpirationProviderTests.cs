@@ -1,10 +1,4 @@
-﻿using System;
-using System.Net;
-using FluentAssertions;
-using Microsoft.Extensions.Caching.Abstractions;
-using Xunit;
-
-namespace HttpClient.Caching.Tests.Abstractions
+﻿namespace HttpClient.Caching.Tests.Abstractions
 {
     public class CacheExpirationProviderTests
     {

@@ -20,7 +20,7 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="Moq.AutoMock" Version="4.0.2" />
-		<PackageReference Include="FluentAssertions" Version="8.9.0" />
+		<PackageReference Include="AwesomeAssertions" Version="9.4.0" />
 	</ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">

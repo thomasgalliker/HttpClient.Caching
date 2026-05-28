@@ -1,14 +1,8 @@
-﻿using System;
-using System.Net.Http;
-using FluentAssertions;
-using Microsoft.Extensions.Caching.Memory;
-using Xunit;
-
-namespace HttpClient.Caching.Tests.InMemory
+﻿namespace HttpClient.Caching.Tests.InMemory
 {
     public class MethodUriHeadersCacheKeysProviderTests
     {
-        private readonly string url = "http://unittest/";
+        private const string TestUrl = "http://unittest/";
 
         [Fact]
         public void ShouldGetKey_EmptyHeaderNames()
@@ -18,7 +12,7 @@ namespace HttpClient.Caching.Tests.InMemory
             var cacheKeysProvider = new MethodUriHeadersCacheKeysProvider(headersNames);
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(this.url),
+                RequestUri = new Uri(TestUrl),
                 Method = HttpMethod.Get
             };
             request.Headers.Add("X-HEADER-1", "Value1");
@@ -38,7 +32,7 @@ namespace HttpClient.Caching.Tests.InMemory
             var cacheKeysProvider = new MethodUriHeadersCacheKeysProvider(headersNames);
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(this.url),
+                RequestUri = new Uri(TestUrl),
                 Method = HttpMethod.Get
             };
             request.Headers.Add("X-HEADER-1", "Value1");
@@ -58,7 +52,7 @@ namespace HttpClient.Caching.Tests.InMemory
             var cacheKeysProvider = new MethodUriHeadersCacheKeysProvider(headersNames);
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri(this.url),
+                RequestUri = new Uri(TestUrl),
                 Method = HttpMethod.Get
             };
             request.Headers.Add("X-HEADER-3", "Value3");
