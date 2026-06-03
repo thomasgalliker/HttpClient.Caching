@@ -7,19 +7,19 @@ Use the following command to install HttpClient.Caching using NuGet package mana
 
     PM> Install-Package HttpClient.Caching
 
-You can use this library in any .Net project which is compatible to .Net Framework 4.5+ and .Net Standard 1.2+ (e.g. Xamarin Android, iOS, Universal Windows Platform, etc.)
+You can use this library in projects targeting `.NET Framework 4.6.2`, `.NET Standard 2.0`, `.NET 8.0` and later.
 
 ### The Purpose of HTTP Caching
 HTTP Caching affects both involved communication peers, the client and the server. On the server-side, caching is appropriate for improving throughput (scalability). HTTP caching doesn't make a single HTTP call faster but it can lead to better response performance in high-load scenarios. On the client-side, caching is used to avoid unnecessarily repetitiv HTTP calls. This leads to less waiting time on the client-side since cache reads have naturally a much better response performance than HTTP calls over relatively slow network links.
 
 ### API Usage
 #### Using MemoryCache
-Declare IMemoryCache in your API service, either by creating an instance manually or by injecting IMemoryCache into your API service class.
+Declare `IMemoryCache` in your API service, either by creating an instance manually or by injecting `IMemoryCache` into your API service class.
 ```C#
-private readonly IMemoryCache memoryCache = new MemoryCache();
+private readonly IMemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
 ```
 
-Following example show how IMemoryCache can be used to store an HTTP GET result in memory for a given time span (cacheExpirection):
+Following example shows how `IMemoryCache` can be used to store an HTTP GET result in memory for a given time span (`cacheExpiration`):
 ```C#
 public async Task<TResult> GetAsync<TResult>(string uri, TimeSpan? cacheExpiration = null)
 {
@@ -37,7 +37,7 @@ public async Task<TResult> GetAsync<TResult>(string uri, TimeSpan? cacheExpirati
 
     var httpResponseMessage = await this.HandleRequest(() => this.httpClient.GetAsync(uri));
     var jsonResponse = await this.HandleResponse(httpResponseMessage);
-    result = await Task.Run(() => JsonConvert.DeserializeObject<TResult>(jsonResponse, this.serializerSettings));
+    result = await Task.Run(() => JsonSerializer.Deserialize<TResult>(jsonResponse, this.serializerSettings));
 
     if (caching)
     {
@@ -55,7 +55,7 @@ public async Task<TResult> GetAsync<TResult>(string uri, TimeSpan? cacheExpirati
 ```
 
 #### Using InMemoryCacheHandler
-HttpClient allows to inject a custom http handler. In the follwing example, we inject an HttpClientHandler which is nested into an InMemoryCacheHandler where the InMemoryCacheHandler is responsible for maintaining and reading the cache.
+`HttpClient` allows injecting a custom HTTP handler. In the following example, an `HttpClientHandler` is nested into an `InMemoryCacheHandler`, and the `InMemoryCacheHandler` is responsible for maintaining and reading the cache.
 ```C#
 static void Main(string[] args)
 {
@@ -110,9 +110,9 @@ TotalRequests: 5
 ### Cache keys
 
 By default, requests will be cached by using a key which is composed with http method and url (only HEAD and GET http methods are supported).
-If this default behavior isn't enough **you can implement your own ICacheKeyProvider** wich provides **cache key** starting **from HttpRequestMessage**.
+If this default behavior isn't enough, you can implement your own `ICacheKeysProvider`, which builds a cache key from an `HttpRequestMessage`.
 
-The following example show how use a cache provider of type MethodUriHeadersCacheKeysProvider.
+The following example shows how to use a cache provider of type `MethodUriHeadersCacheKeysProvider`.
 This cache key provider is already implemented and evaluates http method, specified headers and url to compose a cache key.
 with InMemoryCacheHandler.
 ```C#
@@ -122,7 +122,7 @@ static void Main(string[] args)
 
     var httpClientHandler = new HttpClientHandler();
     var cacheExpirationPerHttpResponseCode = CacheExpirationProvider.CreateSimple(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));
-    // this is a CacheKeyProvider which evaluates http method, specified headers and url to compose a key
+    // this cache key provider evaluates http method, specified headers and url to compose a key
     var cacheKeyProvider = new MethodUriHeadersCacheKeysProvider(new string[] { "FIRST-HEADER", "SECOND-HEADER" });
     var handler = new InMemoryCacheHandler(
         innerHandler: httpClientHandler,

@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Abstractions;
-using Microsoft.Extensions.Caching.InMemory;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ConsoleAppSample
 {
@@ -12,7 +12,7 @@ namespace ConsoleAppSample
     {
         private static async Task Main(string[] args)
         {
-            const string url = "http://worldtimeapi.org/api/timezone/Europe/Zurich";
+            const string url = "https://www.timeapi.io/api/v1/time/current/utc";
 
             // HttpClient uses an HttpClientHandler nested into InMemoryCacheHandler in order to handle http get response caching
             var httpClientHandler = new HttpClientHandler();

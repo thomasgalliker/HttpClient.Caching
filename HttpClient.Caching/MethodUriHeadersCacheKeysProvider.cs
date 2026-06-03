@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text;
 using Microsoft.Extensions.Caching.Abstractions;
 
-namespace Microsoft.Extensions.Caching.InMemory
+namespace Microsoft.Extensions.Caching.Memory
 {
     /// <summary>
     ///     Provides keys to store or retrieve data in the cache by using http method, specific headers and Uri
@@ -16,13 +16,10 @@ namespace Microsoft.Extensions.Caching.InMemory
         /// <summary>
         ///     Initialize the cache key provider passing the headers name that will be used to compose <paramref name="headersName"/>
         /// </summary>
-        /// <param name="headersName"></param>
-        public MethodUriHeadersCacheKeysProvider(string[] headersName)
+        /// <param name="headersName">The header names to be included in the cache key.</param>
+        public MethodUriHeadersCacheKeysProvider(string[]? headersName)
         {
-            if (headersName != null)
-            {
-                this.headersName = headersName.OrderBy(i => i).ToArray();
-            }
+            this.headersName = headersName?.OrderBy(i => i).ToArray() ?? Array.Empty<string>();
         }
 
         /// <summary>
